@@ -1,11 +1,20 @@
 Package: xbrlr
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Tools for XBRL Taxonomy Analytics and Visualization in R
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+Author: person(given = "Brad", family = "West", email = "brad.g.west@gmail.com",
+               role = c("aut", "cre"))
+Description: This package provides tools for visualizing and analyzing XBRL
+    taxonomy data.  Primary functionality is devoted to visualising XBRL 
+    taxonomy network tree graphs.
+License:
 Encoding: UTF-8
 LazyData: true
+Imports:
+    dplyr,
+    igraph,
+    RColorBrewer,
+    readxl,
+    stringr
+Depends: R (>= 3.3.3)
+RoxygenNote: 6.0.1
