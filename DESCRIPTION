@@ -6,7 +6,9 @@ Author: person(given = "Brad", family = "West", email = "brad.g.west@gmail.com",
                role = c("aut", "cre"))
 Description: This package provides tools for visualizing and analyzing XBRL
     taxonomy data.  Primary functionality is devoted to visualising XBRL 
-    taxonomy network tree graphs.
+    taxonomy network tree graphs.  This package is not intended for external
+    use, but rather is used more as a structure for formating a larger scale
+    and ongoing data analysis.
 License:
 Encoding: UTF-8
 LazyData: true
@@ -14,6 +16,7 @@ Imports:
     dplyr,
     igraph,
     RColorBrewer,
+    readr,
     readxl,
     stringr
 Depends: R (>= 3.3.3)
