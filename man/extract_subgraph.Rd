@@ -4,12 +4,13 @@
 \alias{extract_subgraph}
 \title{Create Subgraph from Root Node}
 \usage{
-extract_subgraph(graph = g, element_of_interest = "Revenues")
+extract_subgraph(graph = g, element_of_interest)
 }
 \arguments{
 \item{graph}{The parent graph from which to extract a subgraph}
 
-\item{element_of_interest}{Root node of returned graph}
+\item{element_of_interest}{Root node of returned graph as a string. (e.g.
+"Revenues")}
 }
 \value{
 A subgraph with root \code{element_of_interest}

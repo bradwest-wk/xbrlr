@@ -4,12 +4,7 @@
 \alias{create_statement_tree}
 \title{Create Statement Tree}
 \usage{
-
-  create_statement_tree(taxonomy_path = "~/Google_Drive/Projects/taxonomy_rebuild/Taxonomy_2017Amended.xlsx",
-  linkbase = "Calculation",
-  statement = "124000 - Statement - Statement of Income (Including Gross Margin)",
-  title = "2017 Income Statement (Including Gross Margin) Calculation Link",
-  image_path = "~/Google_Drive/Projects/taxonomy_rebuild/income_statement_including_gross_margin.png")
+create_statement_tree(taxonomy_path, linkbase, statement, title, image_path)
 }
 \arguments{
 \item{taxonomy_path}{Path to xls/xlsx file}

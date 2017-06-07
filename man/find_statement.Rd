@@ -4,8 +4,7 @@
 \alias{find_statement}
 \title{Extract Financial Statement of Interest}
 \usage{
-find_statement(statement = "Statement of Income (Including Gross Margin)",
-  taxonomy, linkbase = "Calculation")
+find_statement(statement, taxonomy, linkbase)
 }
 \arguments{
 \item{statement}{Title of statement of interest as string. Incorrect or vague

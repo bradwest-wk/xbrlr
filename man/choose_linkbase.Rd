@@ -4,7 +4,7 @@
 \alias{choose_linkbase}
 \title{Choose Linkbase}
 \usage{
-choose_linkbase(linkbase = "Calculation")
+choose_linkbase(linkbase)
 }
 \arguments{
 \item{linkbase}{Linkbase to choose, either Calculation of Presentation}
