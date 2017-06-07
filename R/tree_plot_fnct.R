@@ -24,7 +24,13 @@ adv_tree_plot <- function(edgelist,
     # paste0("Preliminary Model: ", Sys.Date())
 
   # read edgelist
-  edges <- readr::read_csv(file = edgelist, col_names = TRUE)
+  if (endsWith(edgelist, ".csv")){
+      edges <- readr::read_csv(file = edgelist, col_names = TRUE)
+  } else if (endsWith(edgelist, ".Rdata")){
+      edges <- load(edgelist)
+  } else {
+      stop("Please enter either csv or Rdata file")
+  }
   # create graph
   g <- igraph::graph_from_edgelist(as.matrix(edges), directed = T)
 
@@ -38,7 +44,8 @@ adv_tree_plot <- function(edgelist,
   # cut count variable into 20 levels
   breaks <- quantile(usage$count, probs = seq(0,1,0.05))
   usage <- usage %>%
-      dplyr::mutate(count_level = cut(usage$count, breaks = breaks, labels = F))
+      dplyr::mutate(count_level = cut(usage$count, breaks = breaks,
+                                      labels = F))
   # usage$count_level[nrow(usage)] <- 1
 
   # Set usage variable
