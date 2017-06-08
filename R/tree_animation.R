@@ -185,54 +185,61 @@ for(i in V(g2)$name){
 
 # Toy dataset =================================================================
 
-edge_old <- data.frame(
-    parent = c(
-        "Revenues", "Revenues","Revenues", "FinancialServicesRevenue",
-        "FinancialServicesRevenue", "NetInvestmentIncome", "OtherIncome",
-        "OtherIncome", "InterestIncomeOperating", "FeesAndCommissions",
-        "GainsLossesOnSalesOfAssets"
-    ),
-    child = c(
-        "FinancialServicesRevenue", "NetInvestmentIncome", "OtherIncome",
-        "FeesAndCommissions", "GainsLossesOnSalesOfAssets",
-        "InterestIncomeOperating","GainsLossesOnSalesOfAssets",
-        "InsuranceCompaniesRevenueNet",
-        "BankHoldingCompaniesFeesAndCommissions", "ServicingFeesNet",
-        "GainsLossesOnSaleOfDerivatives"
+#' Generate and Plot Toy dataset
+generate_toy <- function(){
+    edge_old <- data.frame(
+        parent = c(
+            "Revenues", "Revenues","Revenues", "FinancialServicesRevenue",
+            "FinancialServicesRevenue",
+            "FinancialServicesRevenue", "NetInvestmentIncome", "OtherIncome",
+            "OtherIncome", "InterestIncomeOperating", "FeesAndCommissions",
+            "GainsLossesOnSalesOfAssets"
+        ),
+        child = c(
+            "FinancialServicesRevenue", "NetInvestmentIncome", "OtherIncome",
+            "FeesAndCommissions", "GainsLossesOnSalesOfAssets",
+            "BankHoldingCompaniesRevenue",
+            "InterestIncomeOperating","GainsLossesOnSalesOfAssets",
+            "InsuranceCompaniesRevenueNet",
+            "BankHoldingCompaniesFeesAndCommissions", "ServicingFeesNet",
+            "GainsLossesOnSaleOfDerivatives"
+        )
     )
-)
 
-edge_new <- data.frame(
-    parent = c("Revenues", "Revenues", "InsuranceCompaniesRevenueNet",
-               "InsuranceCompaniesRevenueNet", "NetInvestmentIncome",
-               "NetInvestmentIncome",
-               "PremiumsEarnedNet", "BankHoldingCompaniesRevenue",
-               "BankHoldingCompaniesNonInterestIncome"
-    ),
-    child = c("BankHoldingCompaniesRevenue", "InsuranceCompaniesRevenueNet",
-              "NetInvestmentIncome","PremiumsEarnedNet",
-              "GrossInvestmentIncomeOperating", "InterestIncomeOperating",
-              "InsuranceCommissionsAndFees",
-              "BankHoldingCompaniesNonInterestIncome",
-              "BankHoldingCompaniesFeesAndCommissions"
+    edge_new <- data.frame(
+        parent = c("Revenues", "Revenues", "InsuranceCompaniesRevenueNet",
+                   "InsuranceCompaniesRevenueNet", "NetInvestmentIncome",
+                   "NetInvestmentIncome",
+                   "PremiumsEarnedNet", "BankHoldingCompaniesRevenue",
+                   "BankHoldingCompaniesNonInterestIncome"
+        ),
+        child = c("BankHoldingCompaniesRevenue", "InsuranceCompaniesRevenueNet",
+                  "NetInvestmentIncome","PremiumsEarnedNet",
+                  "GrossInvestmentIncomeOperating", "InterestIncomeOperating",
+                  "InsuranceCommissionsAndFees",
+                  "BankHoldingCompaniesNonInterestIncome",
+                  "BankHoldingCompaniesFeesAndCommissions"
+        )
     )
-)
 
-g_old <- igraph::graph_from_edgelist(as.matrix(edge_old))
-g_new <- igraph::graph_from_edgelist(as.matrix(edge_new))
+    g_old <- igraph::graph_from_edgelist(as.matrix(edge_old))
+    g_new <- igraph::graph_from_edgelist(as.matrix(edge_new))
 
-vertex_color_old <- RColorBrewer::brewer.pal(3, "Set2")[3]
-edge_color_old <- RColorBrewer::brewer.pal(3, "Set2")[1]
-vertex_color_new <- RColorBrewer::brewer.pal(5, "Set2")[4]
-edge_color_new <- RColorBrewer::brewer.pal(5, "Set2")[5]
+    vertex_color_old <- RColorBrewer::brewer.pal(3, "Set2")[3]
+    edge_color_old <- RColorBrewer::brewer.pal(3, "Set2")[1]
+    vertex_color_new <- RColorBrewer::brewer.pal(5, "Set2")[4]
+    edge_color_new <- RColorBrewer::brewer.pal(5, "Set2")[5]
 
-par(mfrow= c(1,2), srt = 0, cex = .5)
-igraph::plot.igraph(g_old, layout = igraph::layout_as_tree(g_old),
-                    vertex.label.cex = 1, vertex.color = vertex_color_old,
-                    edge.color = edge_color_old)
-igraph::plot.igraph(g_new, layout = igraph::layout_as_tree(g_new),
-                    vertex.label.cex = 1, vertex.color = vertex_color_new,
-                    edge.color = edge_color_new)
+    par(mfrow= c(1,2), srt = 0, cex = .5)
+    igraph::plot.igraph(g_old, layout = igraph::layout_as_tree(g_old),
+                        vertex.label.cex = 1, vertex.color = vertex_color_old,
+                        edge.color = edge_color_old)
+    igraph::plot.igraph(g_new, layout = igraph::layout_as_tree(g_new),
+                        vertex.label.cex = 1, vertex.color = vertex_color_new,
+                        edge.color = edge_color_new)
+}
+
+# Functions for Plotting ======================================================
 
 # Potential methods:
 # vertex_decision -- makes a decision whether to keep the current vertex or not.
@@ -247,6 +254,7 @@ igraph::plot.igraph(g_new, layout = igraph::layout_as_tree(g_new),
 # parent
 
 # topological sorting of an igraph object:
+## NOT NEEDED
 igraph::topo_sort(g_new, mode = "out")
 igraph::topo_sort(g_old, mode = "out")
 
@@ -276,16 +284,25 @@ vertex_parents <- function(g, v) {
 #' @return boolean; if the parent is correct: true, else: false
 correct_parent <- function(g_old, g_new, v) {
     if (!(v %in% igraph::V(g_new))) {
-        FALSE
+        return(FALSE)
         # stop("Vertex not found in new graph")
     } else if (length(vertex_parents(g_old, v)$vertices) > 1) {
-        FALSE
+        return(FALSE)
         # stop("More than one parent found in new graph")
-    } else if (igraph::neighbors(g_old, v$name, mode = "in") ==
-               igraph::neighbors(g_new, v$name, mode = "in")) {
-        TRUE
+    } else if (is.null(igraph::neighbors(g_old, v$name, mode = "in")$name) &
+               is.null(igraph::neighbors(g_new, v$name, mode = "in")$name)) {
+        return(TRUE)
+    } else if (xor(is.null(igraph::neighbors(g_old, v$name, mode = "in")$name),
+               is.null(igraph::neighbors(g_new, v$name, mode = "in")$name))) {
+        return(FALSE)
+    } else if ( length(igraph::neighbors(g_old, v$name, mode = "in")$name) !=
+                length(igraph::neighbors(g_new, v$name, mode = "in")$name) ) {
+        return(FALSE)
+    } else if ( identical(igraph::neighbors(g_old, v$name, mode = "in")$name,
+                         igraph::neighbors(g_new, v$name, mode = "in")$name) ) {
+        return(TRUE)
     } else {
-        FALSE
+        return(FALSE)
     }
 }
 
@@ -311,12 +328,14 @@ create_parent <- function(g_old, g_new, v) {
         igraph::add_vertices(g_old, 1, attr = list(name = desired_parent$name
         ))
     added_vertex <- tail(igraph::V(g_old), n = 1)
-    added_vertex_name <- added_vertex$name
+    added_vertex_name <- tail(igraph::V(g_old), n = 1)$name
     # added_vertex <- igraph::V(g_old)[igraph::V(g_old)$name ==
     #                                      desired_parent$name]
-    v_num <- which(igraph::V(g_old)$name == name)
+    # v_num <- which(igraph::V(g_old)$name == name)
     g_old <- igraph::add_edges(
-        g_old, edges = c(added_vertex, igraph::V(g_old)[v_num]))
+        g_old, edges = c(
+            added_vertex, igraph::V(g_old)[igraph::V(g_old)$name == name]
+            ))
         # igraph::add_edges(g_old, edges = c(
         #     which(igraph::V(g_old)$name == added_vertex$name),
         #     which(igraph::V(g_old)$name == v$name)
@@ -332,7 +351,7 @@ create_parent <- function(g_old, g_new, v) {
             igraph::add_edges(g_old, edges = c(desired_parent, v)
                 # which(igraph::V(g_old)$name == desired_parent$name),
                 # which(igraph::V(g_old)$name == added_vertex$name)
-            ))
+            )
     }
     return(g_old)
 }
@@ -355,6 +374,40 @@ children_desired <- function(g_old, g_new, v) {
         }
     }
     return(FALSE)
+}
+
+
+#' Recursively Check Parents
+#'
+#' Method for checking parent path all the way to root node.
+#'
+#' @param g_old an igraph graph, the working graph
+#' @param g_new an igraph graph, the desired graph
+#' @param v an igraph vertex present in the old graph, the end node in the path
+#' @return boolean; True if all parents are desired and in correct order, False
+#'   otherwise
+check_parent_path <- function(g_old, g_new, v) {
+    root_old <- igraph::V(g_old)[which(
+        igraph::degree(g_old, v = igraph::V(g_old), mode = "in")==0)]
+    root_new <- igraph::V(g_new)[which(
+        igraph::degree(g_new, v = igraph::V(g_new), mode = "in")==0)]
+    if ( root_old != root_new ) {
+        return(FALSE)
+    }
+    old_path <- igraph::get.shortest.paths(g_old, root_old, v)$vpath[[1]]
+    new_path <- igraph::get.shortest.paths(g_new, root_new, v$name)$vpath[[1]]
+    if ( length(old_path) != length(new_path) )  {
+        return(FALSE)
+    } else if ( length(old_path)<=2 ) {
+        return(TRUE)
+    } else {
+        for (i in 2:old_path) {
+            if (old_path[i]$name != new_path[i]$name) {
+                return(FALSE)
+            }
+        }
+    }
+    return(TRUE)
 }
 
 
@@ -387,7 +440,8 @@ vertex_decision <- function(g_old, g_new, v) {
     } else {
         # incorrect parent
         if ( !correct_parent(g_old, g_new, v) ) {
-            for (i in igraph::incident(g_old, v, mode = "in")) {
+            for (i in 1:length(igraph::incident(g_old, v, mode = "in"))) {
+                # delete incorrect incident edges
                 if ( igraph::neighbors(g_old, v, mode = "in")[i]$name !=
                      igraph::neighbors(g_new, v$name, mode = "in")[i]$name ) {
                     g_old <-
@@ -400,28 +454,63 @@ vertex_decision <- function(g_old, g_new, v) {
                 }
             }
         }
-        # if the degree in is one, then that's the correct parent. Otherwise
-        # it's a lone node that needs a parent created.
+        # if the degree in is one, then that's the correct parent, although the
+        # parent path could be wrong. Otherwise it's a lone node that needs a
+        # parent created.
         v <- igraph::V(g_old)[igraph::V(g_old)$name == v$name]
         if ( igraph::degree(g_old, v, mode = "in")==0 ) {
             # parent in current graph?
-            if ( igraph::neighbors(g_new, v$name, mode = "in") %in%
-                igraph::V(g_old) ) {
-                # Check recursively here if parents are good
-                ##
-                parent_name <-
-                    igraph::neighbors(g_new, v$name, mode = "in")$name
-                parent_vertex <- igraph::V(g_old)[
-                    which(igraph::V(g_old)$name == parent_name)]
-                g_old <- igraph::add_edges(
-                    g_old, edges = c(
-                        parent_vertex, v))
-            } else {
-                g_old <- create_parent(g_old, g_new, v)
+            parent <- igraph::neighbors(g_new, v$name, mode = "in")$name
+            if (length(parent) > 0) {
+                if ( parent %in%
+                     igraph::V(g_old)$name ) {
+                    # Check recursively here if parents are good
+                    ##
+                    parent_name <-
+                        igraph::neighbors(g_new, v$name, mode = "in")$name
+                    parent_vertex <- igraph::V(g_old)[
+                        igraph::V(g_old)$name == parent_name]
+                    name <- v$name
+                    g_old <- igraph::add_edges(
+                        g_old, edges = c(
+                            parent_vertex, v))
+                    v_num <- which(igraph::V(g_old)$name == name)
+                    v <- igraph::V(g_old)[v_num]
+                    if ( !check_parent_path(g_old, g_new, v) ) {
+                        root_old <- igraph::V(g_old)[which(
+                            igraph::degree(
+                                g_old, v = igraph::V(g_old), mode = "in")==0)]
+                        old_path <- igraph::get.shortest.paths(
+                            g_old, root_old, v)$vpath[[1]]
+                        # should I reverse?
+                        for (i in 2:length(old_path)) {
+                            v_name <- rev(old_path)[i]$name
+                            vertex <- igraph::V(g_old)[
+                                igraph::V(g_old)$name == v_name]
+                            g_old <- vertex_decision(
+                                g_old, g_new, vertex)
+                        }
+                    }
+                } else {
+                    g_old <- create_parent(g_old, g_new, v)
+                    if ( !check_parent_path(g_old, g_new, v) ) {
+                        old_path <- igraph::get.shortest.paths(
+                            g_old, root_old, v)$vpath[[1]]
+                        # should I reverse?
+                        for (i in 2:length(old_path)) {
+                            v_name <- rev(old_path)[i]$name
+                            vertex <- igraph::V(g_old)[
+                                igraph::V(g_old)$name == v_name]
+                            g_old <- vertex_decision(
+                                g_old, g_new, vertex)
+                        }
+                    }
+                }
             }
         }
-        # correct parent we now have
     }
+    # correct parent we now have
+    return(g_old)
 }
 
 igraph::plot.igraph(g_old, layout = igraph::layout_as_tree(g_old))
@@ -432,8 +521,8 @@ igraph::plot.igraph(g_new, layout = igraph::layout_as_tree(g_new),
 # delete vertex:
 # delete_vertices(graph, v) (where v is a vertex sequence)
 
-# igraph::V(g_old)[igraph::V(g_old)$name == "BankHoldingCompaniesRevenue"]
-# igraph::plot.igraph(g_store, layout = igraph::layout_as_tree(g_store))
+# v <- igraph::V(g_old)[igraph::V(g_old)$name == "NetInvestmentIncome"]
+# v <- igraph::V(g_old)[igraph::V(g_old)$name == "FinancialServicesRevenue"]
+# igraph::plot.igraph(g_test, layout = igraph::layout_as_tree(g_test))
 
 # igraph::incident(g_old, "InterestIncomeOperating", mode = "in") %in% igraph::E(g_new)
-
