@@ -262,7 +262,7 @@ igraph::topo_sort(g_old, mode = "out")
 #' Finds the parents of the current vertex.
 #'
 #' @param g an igraph graph
-#' @param v an igraph vertex
+#' @param v an igraph vertex name
 #' @return a list containing the parent vertices (igraph.vs object) and parent
 #'   edges (igraph.es object)
 vertex_parents <- function(g, v) {
@@ -278,27 +278,27 @@ vertex_parents <- function(g, v) {
 #' Checks if the current vertex has the correct parents.
 #'
 #' @param g_old an igraph graph
-#' @param v an igraph vertex in both graphs g_old and g_new
+#' @param v an igraph vertex name in both graphs g_old and g_new
 #' @param g_new an igraph graph in which to check if the parent is correct
 #' @return boolean; if the parent is correct: true, else: false
 correct_parent <- function(g_old, g_new, v) {
-    if (!(v %in% igraph::V(g_new))) {
+    if (!(v %in% igraph::V(g_new)$name)) {
         return(FALSE)
         # stop("Vertex not found in new graph")
     } else if (length(vertex_parents(g_old, v)$vertices) > 1) {
         return(FALSE)
         # stop("More than one parent found in new graph")
-    } else if (is.null(igraph::neighbors(g_old, v$name, mode = "in")$name) &
-               is.null(igraph::neighbors(g_new, v$name, mode = "in")$name)) {
+    } else if (is.null(igraph::neighbors(g_old, v, mode = "in")$name) &
+               is.null(igraph::neighbors(g_new, v, mode = "in")$name)) {
         return(TRUE)
-    } else if (xor(is.null(igraph::neighbors(g_old, v$name, mode = "in")$name),
-               is.null(igraph::neighbors(g_new, v$name, mode = "in")$name))) {
+    } else if (xor(is.null(igraph::neighbors(g_old, v, mode = "in")$name),
+               is.null(igraph::neighbors(g_new, v, mode = "in")$name))) {
         return(FALSE)
-    } else if ( length(igraph::neighbors(g_old, v$name, mode = "in")$name) !=
-                length(igraph::neighbors(g_new, v$name, mode = "in")$name) ) {
+    } else if ( length(igraph::neighbors(g_old, v, mode = "in")$name) !=
+                length(igraph::neighbors(g_new, v, mode = "in")$name) ) {
         return(FALSE)
-    } else if ( identical(igraph::neighbors(g_old, v$name, mode = "in")$name,
-                         igraph::neighbors(g_new, v$name, mode = "in")$name) ) {
+    } else if ( identical(igraph::neighbors(g_old, v, mode = "in")$name,
+                         igraph::neighbors(g_new, v, mode = "in")$name) ) {
         return(TRUE)
     } else {
         return(FALSE)
@@ -313,45 +313,44 @@ correct_parent <- function(g_old, g_new, v) {
 #'
 #' @param g_old an igraph graph, the working graph
 #' @param g_new an igraph graph, the desired graph
-#' @param v an igraph vertex, the vertex whose parent must be created
+#' @param v an igraph vertex name, the vertex whose parent must be created
 #' @param filename The output filename
 #' @return a new igraph graph with the correct parent in place
 create_parent <- function(g_old, g_new, v, filename) {
-    name = v$name
     v_tmp <- v
-    desired_parent <- igraph::neighbors(g_new, v$name, mode = "in")
+    desired_parent <- igraph::neighbors(g_new, v, mode = "in")$name
     # delete current income edges to v
     g_old <-
         igraph::delete_edges(
-            g_old, igraph::incident(g_old, v$name, mode = "in"
+            g_old, igraph::incident(g_old, v, mode = "in"
         ))
     g_old <-
-        igraph::add_vertices(g_old, 1, attr = list(name = desired_parent$name
+        igraph::add_vertices(g_old, 1, attr = list(name = desired_parent
         ))
-    added_vertex <- tail(igraph::V(g_old), n = 1)
-    added_vertex_name <- tail(igraph::V(g_old), n = 1)$name
+    added_vertex <- tail(igraph::V(g_old), n = 1)$name
+    # added_vertex_name <- tail(igraph::V(g_old), n = 1)$name
     # added_vertex <- igraph::V(g_old)[igraph::V(g_old)$name ==
     #                                      desired_parent$name]
     # v_num <- which(igraph::V(g_old)$name == name)
     g_old <- igraph::add_edges(
         g_old, edges = c(
-            added_vertex_name, name
+            added_vertex, name
             ))
     # plot_tree(g_old, filename) ####
         # igraph::add_edges(g_old, edges = c(
         #     which(igraph::V(g_old)$name == added_vertex$name),
         #     which(igraph::V(g_old)$name == v$name)
         # ))
-    v <- igraph::V(g_old)[igraph::V(g_old)$name == added_vertex_name]
-    desired_parent <- igraph::neighbors(g_new, added_vertex_name, mode = "in")
-    if ( !(desired_parent$name %in% igraph::V(g_old)$name) ) {
-        g_old <- create_parent(g_old, g_new, v)
+    # v <- igraph::V(g_old)[igraph::V(g_old)$name == added_vertex_name]
+    desired_parent <- igraph::neighbors(g_new, added_vertex, mode = "in")$name
+    if ( !(desired_parent %in% igraph::V(g_old)$name) ) {
+        g_old <- create_parent(g_old, g_new, added_vertex)
     } else {
-        desired_parent <- igraph::V(g_old)[
-            igraph::V(g_old)$name == desired_parent$name]
+        # desired_parent <- igraph::V(g_old)[
+            # igraph::V(g_old)$name == desired_parent$name]
         g_old <-
             igraph::add_edges(
-                g_old, edges = c(desired_parent$name, added_vertex_name)
+                g_old, edges = c(desired_parent, added_vertex)
             # igraph::add_edges(g_old, edges = c(desired_parent, v)
                 # which(igraph::V(g_old)$name == desired_parent$name),
                 # which(igraph::V(g_old)$name == added_vertex$name)
@@ -369,7 +368,7 @@ create_parent <- function(g_old, g_new, v, filename) {
 #'
 #' @param g_old igraph graph, the working graph
 #' @param g_new igraph graph, the desired graph
-#' @param v an igraph vertex whose children will be evaluated
+#' @param v an igraph vertex name whose children will be evaluated
 #' @return boolean, True if at least one child is in the desired graph, False
 #'   otherwise
 children_desired <- function(g_old, g_new, v) {
@@ -389,11 +388,11 @@ children_desired <- function(g_old, g_new, v) {
 #'
 #' @param g_old an igraph graph, the working graph
 #' @param g_new an igraph graph, the desired graph
-#' @param v an igraph vertex present in the old graph, the end node in the path
+#' @param v an igraph vertex name present in the old graph, the end node in the path
 #' @return boolean; True if all parents are desired and in correct order, False
 #'   otherwise
 check_parent_path <- function(g_old, g_new, v) {
-    v_name <- v$name
+    # v_name <- v$name
     root_old <- igraph::V(g_old)[which(
         igraph::degree(g_old, v = igraph::V(g_old), mode = "in")==0)]
     root_new <- igraph::V(g_new)[which(
@@ -401,8 +400,8 @@ check_parent_path <- function(g_old, g_new, v) {
     if ( root_old != root_new ) {
         return(FALSE)
     }
-    old_path <- igraph::get.shortest.paths(g_old, root_old, v_name)$vpath[[1]]
-    new_path <- igraph::get.shortest.paths(g_new, root_new, v_name)$vpath[[1]]
+    old_path <- igraph::get.shortest.paths(g_old, root_old, v)$vpath[[1]]
+    new_path <- igraph::get.shortest.paths(g_new, root_new, v)$vpath[[1]]
     if ( length(old_path) != length(new_path) )  {
         return(FALSE)
     } else if ( length(old_path)<=2 ) {
@@ -424,13 +423,13 @@ check_parent_path <- function(g_old, g_new, v) {
 #'
 #' @param g_old an igraph graph, the working graph
 #' @param g_new an igraph graph, the desired graph
-#' @param v an igraph vertex present in the working graph, whose children will
+#' @param v an igraph vertex name present in the working graph, whose children will
 #'   be created
 #' @param filename The output filename
 #' @return an igraph graph, with the correct children nodes in place.
 create_children <- function(g_old, g_new, v, filename) {
-    name = v$name
-    desired_subgraph <- igraph::subcomponent(g_new, name, mode = "out")
+    # name = v$name
+    desired_subgraph <- igraph::subcomponent(g_new, v, mode = "out")
     for (i in 2:length(desired_subgraph)) {
         v_name <- desired_subgraph[i]$name
         if ( v_name %in% igraph::V(g_old)$name ) {
@@ -474,17 +473,17 @@ create_children <- function(g_old, g_new, v, filename) {
 #'
 #' @param g_old an igraph graph, the working graph
 #' @param g_new an igraph graph, the desired graph
-#' @param v an igraph vertex present in the "old" graph
+#' @param v an igraph vertex name present in the "old" graph
 #' @param file The output filename for the image
 #' @return an igraph graph with the appropriate edges deleted
 vertex_decision <- function(g_old, g_new, v, file) {
     # v <- igraph::V(g_old)[igraph::V(g_old)$name == v$name]
     # not desired
-    if ( !(v$name %in% igraph::V(g_new)$name) ) {
+    if ( !(v %in% igraph::V(g_new)$name) ) {
         # desired children
         if ( children_desired(g_old, g_new, v) ) {
             for (i in igraph::subcomponent(g_old, v, mode = "out")) {
-                g_old <- vertex_decision(g_old, g_new, igraph::V(g_old)[i])
+                g_old <- vertex_decision(g_old, g_new, igraph::V(g_old)[i]$name)
             }
         # un-desired children
         } else {
@@ -496,75 +495,66 @@ vertex_decision <- function(g_old, g_new, v, file) {
     } else {
         # incorrect parent
         if ( !correct_parent(g_old, g_new, v) ) {
-            for (i in 1:length(igraph::incident(g_old, v, mode = "in"))) {
+            for (i in 1:length(igraph::neighbors(g_old, v, mode = "in"))) {
                 # delete incorrect incident edges
+                    igraph::neighbors(g_new, v, mode = "in")[1]$name
                 if ( igraph::neighbors(g_old, v, mode = "in")[i]$name !=
-                     igraph::neighbors(g_new, v$name, mode = "in")[i]$name ) {
+                         desired_parent ) {
                     g_old <-
                         igraph::delete_edges(
                             g_old, igraph::E(g_old, c(
                                 igraph::neighbors(
                                     g_old, v, mode = "in")[i], v)
                                 ))
-                    # plot graph
                 }
             }
         }
         # if the degree in is one, then that's the correct parent, although the
         # parent path could be wrong. Otherwise it's a lone node that needs a
         # parent created.
-        v <- igraph::V(g_old)[igraph::V(g_old)$name == v$name]
+        # v <- igraph::V(g_old)[igraph::V(g_old)$name == v$name]
         if ( igraph::degree(g_old, v, mode = "in")==0 ) {
             # parent in current graph?
-            parent <- igraph::neighbors(g_new, v$name, mode = "in")$name
+            parent <- igraph::neighbors(g_new, v, mode = "in")$name
             if (length(parent) > 0) {
-                if ( parent %in%
-                     igraph::V(g_old)$name ) {
+                if ( parent %in% igraph::V(g_old)$name ) {
                     # Check recursively here if parents are good
                     ##
-                    parent_name <-
-                        igraph::neighbors(g_new, v$name, mode = "in")$name
-                    parent_vertex <- igraph::V(g_old)[
-                        igraph::V(g_old)$name == parent_name]
-                    name <- v$name
+                    # parent_vertex <-
+                        # igraph::neighbors(g_new, v, mode = "in")$name
+                    # parent_vertex <- igraph::V(g_old)[
+                        # igraph::V(g_old)$name == parent_name]
                     g_old <- igraph::add_edges(
                         g_old, edges = c(
-                            parent_vertex, v))
+                            parent, v))
                     # plot_tree(g_old, file) ####
-                    v_num <- which(igraph::V(g_old)$name == name)
-                    v <- igraph::V(g_old)[v_num]
                     if ( !check_parent_path(g_old, g_new, v) ) {
-                        name <- v$name
                         root_old <- igraph::V(g_old)[which(
                             igraph::degree(
                                 g_old, v = igraph::V(g_old), mode = "in")==0)]
                         old_path <- igraph::get.shortest.paths(
-                            g_old, root_old, name)$vpath[[1]]
+                            g_old, root_old, v)$vpath[[1]]
                         # should I reverse?
                         for (i in 2:length(old_path)) {
                             v_name <- rev(old_path)[i]$name
-                            vertex <- igraph::V(g_old)[
-                                igraph::V(g_old)$name == v_name]
-                            g_old <- vertex_decision(
-                                g_old, g_new, vertex)
+                            # vertex <- igraph::V(g_old)[
+                            #     igraph::V(g_old)$name == v_name]
+                            g_old <- vertex_decision(g_old, g_new, v_name)
                         }
                     }
                 } else {
                     g_old <- create_parent(g_old, g_new, v, file)
                     if ( !check_parent_path(g_old, g_new, v) ) {
-                        name <- v$name
+                        # name <- v$name
                         root_old <- igraph::V(g_old)[which(
                             igraph::degree(
                                 g_old, v = igraph::V(g_old), mode = "in")==0)]
                         old_path <- igraph::get.shortest.paths(
-                            g_old, root_old, name)$vpath[[1]]
+                            g_old, root_old, v)$vpath[[1]]
                         # should I reverse?
                         for (i in 2:length(old_path)) {
                             v_name <- rev(old_path)[i]$name
-                            vertex <- igraph::V(g_old)[
-                                igraph::V(g_old)$name == v_name]
-                            g_old <- vertex_decision(
-                                g_old, g_new, vertex)
+                            g_old <- vertex_decision(g_old, g_new, v_name)
                         }
                     }
                 }
