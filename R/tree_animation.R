@@ -395,7 +395,8 @@ children_desired <- function(g_old, g_new, v) {
 #'
 #' @param g_old an igraph graph, the working graph
 #' @param g_new an igraph graph, the desired graph
-#' @param v an igraph vertex name present in the old graph, the end node in the path
+#' @param v an igraph vertex name present in the old graph, the end node in the
+#' path
 #' @return boolean; True if all parents are desired and in correct order, False
 #'   otherwise
 check_parent_path <- function(g_old, g_new, v) {
@@ -421,6 +422,26 @@ check_parent_path <- function(g_old, g_new, v) {
         }
     }
     return(TRUE)
+}
+
+
+#' Recursively Check Children
+#'
+#' Method for checking child path for desired node.
+#'
+#' @param g_old an igraph graph, the working graph
+#' @param g_new an igraph graph, the desired graph
+#' @param v an igraph vertex name present in the old graph, the end node in the
+#'  path
+#' @return boolean; True if all parents are esired and in correct order, False
+#' otherwise
+check_child_path <- function(g_old, g_new, v) {
+    old_children <- igraph::subcomponent(g_old, v, mode = "out")$name
+    desired_children <- igraph::subcomponent(g_new, v, mode = "out")$name
+    if ( setequal(old_children, desired_children) ) {
+        return(TRUE)
+    }
+    return(FALSE)
 }
 
 
@@ -577,6 +598,9 @@ vertex_decision <- function(g_old, g_new, v, file) {
                 }
             }
         }
+        if ( !check_child_path(g_old, g_new, v) ) {
+            g_old <- create_children(g_old, g_new, v)
+        }
     }
     # correct parent we now have
     return(g_old)
@@ -617,7 +641,20 @@ plot_tree <- function(g, outname) {
 #' "new status".
 #'
 #' @param g_old The old/working igraph
-#' @param g_new
+#' @param g_new The desired igraph
+#' @param file Image output name
+#' @return An igraph object identical to g_new. Creates images and saves them
+#' to the respective location.
+transform_tree <- function(g_old, g_new, file) {
+    old_vrts <- rev(igraph::V(g_old)$name)
+    # new_vrts <- rev(igraph::V(g_new)$name)
+    # vrts <- c(old_vrts, setdiff(new_vrts, old_vrts))
+    for (i in 1:length(vrts)) {
+        g_old <- vertex_decision(g_old, g_new, old_vrts[i])
+    }
+    return(g_old)
+}
+
 
 igraph::plot.igraph(g_old, layout = igraph::layout_as_tree(g_old))
 igraph::plot.igraph(g_new, layout = igraph::layout_as_tree(g_new),
