@@ -200,7 +200,7 @@ generate_toy <- function(){
             "FeesAndCommissions", "GainsLossesOnSalesOfAssets",
             "BankHoldingCompaniesRevenue",
             "InterestIncomeOperating","GainsLossesOnSalesOfAssets",
-            "BankHoldingCompaniesFeesAndCommissions", "ServicingFeesNet",
+            "BankHoldingCompaniesNonInterestIncome", "ServicingFeesNet",
             "GainsLossesOnSaleOfDerivatives"
         )
     )
@@ -229,7 +229,7 @@ generate_toy <- function(){
     vertex_color_new <- RColorBrewer::brewer.pal(5, "Set2")[4]
     edge_color_new <- RColorBrewer::brewer.pal(5, "Set2")[5]
 
-    par(mfrow= c(1,2), srt = 0, cex = .5)
+    par(mfrow= c(1,2), srt = 0, cex = .75)
     igraph::plot.igraph(g_old, layout = igraph::layout_as_tree(g_old),
                         vertex.label.cex = 1, vertex.color = vertex_color_old,
                         edge.color = edge_color_old)
@@ -256,6 +256,13 @@ generate_toy <- function(){
 ## NOT NEEDED
 igraph::topo_sort(g_new, mode = "out")
 igraph::topo_sort(g_old, mode = "out")
+
+# Need to change the number of expressions that can be evaluated in order to
+# use the nested recursion:
+old_exp <- getOption("expressions")
+options(expressions = 10000)
+options(expressions = old_exp)
+
 
 #' Vertex Parents
 #'
@@ -334,7 +341,7 @@ create_parent <- function(g_old, g_new, v, filename) {
     # v_num <- which(igraph::V(g_old)$name == name)
     g_old <- igraph::add_edges(
         g_old, edges = c(
-            added_vertex, name
+            added_vertex, v
             ))
     # plot_tree(g_old, filename) ####
         # igraph::add_edges(g_old, edges = c(
@@ -430,36 +437,38 @@ check_parent_path <- function(g_old, g_new, v) {
 create_children <- function(g_old, g_new, v, filename) {
     # name = v$name
     desired_subgraph <- igraph::subcomponent(g_new, v, mode = "out")
-    for (i in 2:length(desired_subgraph)) {
-        v_name <- desired_subgraph[i]$name
-        if ( v_name %in% igraph::V(g_old)$name ) {
-            # possibly add a condition for if the degree of node is zero
-            # or can just add to that current node
-            next
-        } else {
-            g_old <-
-                igraph::add_vertices(
-                    g_old, 1, attr = list(name = v_name
-                    ))
-        }
-        # the alternative to above:
-        # this will add new nodes to existing nodes even if those existing do
-        # not have the correct path to the root node.
-        # if ( !(v_name %in% igraph::V(g_old)$name)) {
-        #     g_old <-
-        #         igraph::add_vertices(
-        #             g_old, 1, attr = list(name = v_name
-        #             ))
-        # }
+    if ( length(desired_subgraph) > 1 ) {
+        for (i in 2:length(desired_subgraph)) {
+            v_name <- desired_subgraph[i]$name
+            if ( v_name %in% igraph::V(g_old)$name ) {
+                # possibly add a condition for if the degree of node is zero
+                # or can just add to that current node
+                next
+            } else {
+                g_old <-
+                    igraph::add_vertices(
+                        g_old, 1, attr = list(name = v_name
+                        ))
+            }
+            # the alternative to above:
+            # this will add new nodes to existing nodes even if those existing do
+            # not have the correct path to the root node.
+            # if ( !(v_name %in% igraph::V(g_old)$name)) {
+            #     g_old <-
+            #         igraph::add_vertices(
+            #             g_old, 1, attr = list(name = v_name
+            #             ))
+            # }
 
-        desired_parent <- igraph::neighbors(g_new, v_name, mode = "in")[1]$name
-        if ( !(desired_parent %in% igraph::V(g_old)$name)) {
-            warning("No parent exists in working graph, cannot add edge")
-            # plot_tree(g_old, filename) ####
-        } else {
-            g_old <- igraph::add_edges(
-                        g_old, edges = c(desired_parent, v_name))
-            # plot_tree(g_old, filename) ####
+            desired_parent <- igraph::neighbors(g_new, v_name, mode = "in")[1]$name
+            if ( !(desired_parent %in% igraph::V(g_old)$name)) {
+                warning("No parent exists in working graph, cannot add edge")
+                # plot_tree(g_old, filename) ####
+            } else {
+                g_old <- igraph::add_edges(
+                            g_old, edges = c(desired_parent, v_name))
+                # plot_tree(g_old, filename) ####
+            }
         }
     }
     return(g_old)
@@ -477,34 +486,37 @@ create_children <- function(g_old, g_new, v, filename) {
 #' @param file The output filename for the image
 #' @return an igraph graph with the appropriate edges deleted
 vertex_decision <- function(g_old, g_new, v, file) {
-    # v <- igraph::V(g_old)[igraph::V(g_old)$name == v$name]
+    if ( !(v %in% igraph::V(g_old)$name) ) {
+        return(g_old)
+    }
     # not desired
     if ( !(v %in% igraph::V(g_new)$name) ) {
         # desired children
         if ( children_desired(g_old, g_new, v) ) {
-            for (i in igraph::subcomponent(g_old, v, mode = "out")) {
-                g_old <- vertex_decision(g_old, g_new, igraph::V(g_old)[i]$name)
+            old_children <- igraph::subcomponent(g_old, v, mode = "out")
+            for (i in 1:(length(old_children) - 1)) {
+                v_name <- rev(old_children)[i]$name
+                g_old <- vertex_decision(g_old, g_new, v_name)
             }
         # un-desired children
-        } else {
-            g_old <- igraph::delete_vertices(
-                g_old, igraph::subcomponent(g_old, v, mode = "out"
-                ))
         }
+        g_old <- igraph::delete_vertices(
+            g_old, igraph::subcomponent(g_old, v, mode = "out"))
     # desired node
     } else {
         # incorrect parent
         if ( !correct_parent(g_old, g_new, v) ) {
             for (i in 1:length(igraph::neighbors(g_old, v, mode = "in"))) {
                 # delete incorrect incident edges
-                    igraph::neighbors(g_new, v, mode = "in")[1]$name
+                    desired_parent <-
+                        igraph::neighbors(g_new, v, mode = "in")[1]$name
                 if ( igraph::neighbors(g_old, v, mode = "in")[i]$name !=
                          desired_parent ) {
                     g_old <-
                         igraph::delete_edges(
                             g_old, igraph::E(g_old, c(
                                 igraph::neighbors(
-                                    g_old, v, mode = "in")[i], v)
+                                    g_old, v, mode = "in")[i]$name, v)
                                 ))
                 }
             }
@@ -536,6 +548,11 @@ vertex_decision <- function(g_old, g_new, v, file) {
                             g_old, root_old, v)$vpath[[1]]
                         # should I reverse?
                         for (i in 2:length(old_path)) {
+                            ###
+                            # Need to actually create the vertex in the new graph
+                            # if condition for it the vertex is in the working graph
+
+                            ###
                             v_name <- rev(old_path)[i]$name
                             # vertex <- igraph::V(g_old)[
                             #     igraph::V(g_old)$name == v_name]
@@ -552,7 +569,7 @@ vertex_decision <- function(g_old, g_new, v, file) {
                         old_path <- igraph::get.shortest.paths(
                             g_old, root_old, v)$vpath[[1]]
                         # should I reverse?
-                        for (i in 2:length(old_path)) {
+                        for ( i in 1:length(old_path) ) {
                             v_name <- rev(old_path)[i]$name
                             g_old <- vertex_decision(g_old, g_new, v_name)
                         }
@@ -593,10 +610,20 @@ plot_tree <- function(g, outname) {
     dev.off()
 }
 
+
+#' Transform Tree
+#'
+#' Entry function for transforming a taxonomy tree from an "old" status to a
+#' "new status".
+#'
+#' @param g_old The old/working igraph
+#' @param g_new
+
 igraph::plot.igraph(g_old, layout = igraph::layout_as_tree(g_old))
 igraph::plot.igraph(g_new, layout = igraph::layout_as_tree(g_new),
                     vertex.label.cex = 1, vertex.color = vertex_color_new,
                     edge.color = edge_color_new)
+igraph::plot.igraph(g_test, layout = igraph::layout_as_tree(g_test))
 
 # file <-
 
@@ -609,6 +636,7 @@ igraph::plot.igraph(g_new, layout = igraph::layout_as_tree(g_new),
 # v <- igraph::V(g_old)[igraph::V(g_old)$name == "BankHoldingCompaniesRevenue"]
 # v <- igraph::V(g_old)[igraph::V(g_old)$name == "Revenues"]
 # v <- igraph::V(g_old)[igraph::V(g_old)$name == "BankHoldingCompaniesFeesAndCommissions"]
-# igraph::plot.igraph(g_test, layout = igraph::layout_as_tree(g_test))
+
+
 
 # igraph::incident(g_old, "InterestIncomeOperating", mode = "in") %in% igraph::E(g_new)
