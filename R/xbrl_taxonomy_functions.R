@@ -60,15 +60,23 @@ excel_to_df <- function(path, linkbase){
 #'   corresponding parent, the element label, depth, and if calculation linkbase
 #'   the weight
 find_statement <- function(statement, taxonomy, linkbase){
-    start_index <- grep(statement, taxonomy$name, fixed = TRUE) + 2
+    start_index <- which(taxonomy$name==statement) + 2
+    # start_index <- grep(statement, taxonomy$name, fixed = TRUE) + 2
     if(length(start_index) > 1){
         stop("More than one statment of that name")
     } else if (length(start_index) == 0){
         stop("No statement found")
     }
     # Find next taxonomy
-    end_index <- subset(which(taxonomy$prefix=="LinkRole"),
-                        which(taxonomy$prefix=="LinkRole") > start_index)[1] - 1
+    end_index <-
+        subset(which(
+            taxonomy$prefix=="LinkRole"),
+            which(taxonomy$prefix=="LinkRole") > start_index)[1] - 1
+
+    if (is.na(end_index)){
+        end_index <- nrow(taxonomy)
+    }
+
     if(linkbase == "Calculation"){
         columns_of_interest <- c(2,3,4,7,8)
         column_names <- c("child", "label", "depth", "weight", "parent")
@@ -79,6 +87,10 @@ find_statement <- function(statement, taxonomy, linkbase){
     # Extract statement
     statement_of_interest <- taxonomy[
         start_index:end_index, columns_of_interest]
+    statement_of_interest <-
+        statement_of_interest[
+            rowSums(is.na(statement_of_interest)) !=
+                ncol(statement_of_interest),]
     colnames(statement_of_interest) <- column_names
     if ("weight" %in% colnames(statement_of_interest)){
         statement_of_interest$weight <- as.integer(
@@ -88,6 +100,8 @@ find_statement <- function(statement, taxonomy, linkbase){
     # remove prefix from parent
     statement_of_interest$parent <- sub("us-gaap:", "",
                                         statement_of_interest$parent)
+    statement_of_interest <-
+        statement_of_interest[!duplicated(statement_of_interest$child),]
     return(statement_of_interest)
 }
 
@@ -112,13 +126,16 @@ create_graph <- function(statement_of_interest = statement, root_nodes = NA){
     roots <- which(igraph::degree(g, v = igraph::V(g), mode = "in")==0)
     # Add weight and depth attribute to graph
     if("weight" %in% colnames(statement_of_interest)){
-        igraph::V(g)$weight <- statement_of_interest$weight[which(
-            igraph::V(g)$name==statement_of_interest$child)]
+        igraph::V(g)$weight <- statement_of_interest$weight
+        # [which(
+        #     igraph::V(g)$name==statement_of_interest$child)]
     }
-    igraph::V(g)$depth <- statement_of_interest$depth[which(
-        igraph::V(g)$name==statement_of_interest$child)]
-    igraph::V(g)$label <- statement_of_interest$label[which(
-        igraph::V(g)$name==statement_of_interest$child)]
+    igraph::V(g)$depth <- statement_of_interest$depth
+    # [which(
+    #     igraph::V(g)$name==statement_of_interest$child)]
+    igraph::V(g)$label <- statement_of_interest$label
+    # [which(
+    #     igraph::V(g)$name==statement_of_interest$child)]
 
     igraph::E(g)$color <- colors[1]
     igraph::V(g)$color <- colors[3]
