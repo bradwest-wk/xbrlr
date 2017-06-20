@@ -22,6 +22,20 @@ for (i in 1:length(statement_names)) {
         graphs[[i]] <- create_graph(df)
 }
 
+#' Draw a Simple Legend
+#'
+#' This draws a simple legend
+draw_legend <- function() {
+    plot(0:1, 0:1, type="n", axes = F, ann=FALSE)
+    box(which = "plot", lwd = 4)
+    points(0.15, 0.9, pch = 21, bg = "#8DA0CB", cex = 35)
+    text(0.35, 0.9, labels = "Elements", cex = 15, pos = 4)
+    segments(0.05, 0.8, 0.25, 0.8, col = "#66C2A5", lwd = 20)
+    text(0.35, 0.8, labels = "Addition", cex = 15, pos = 4)
+    segments(0.05, 0.7, 0.25, 0.7, col = "#FC8D62", lwd = 20)
+    text(0.35, 0.7, labels = "Subtraction", cex = 15, pos = 4)
+}
+
 #' Plot Multiple Graphs
 #'
 #' Method for plotting panels of statements
@@ -34,11 +48,15 @@ for (i in 1:length(statement_names)) {
 #' @param cols The number of columns
 #' the graph vector.
 panel_trees <- function(graphs, out_file, main_title, graph_titles, rows, cols){
+    if(cols*rows == length(graphs)){
+        # in order to plot a legend
+        cols <- cols+1
+    }
     png(out_file, width = 1920*cols,
         height = 1920*rows)
     par(mfrow=c(rows, cols),
         mar = c(10,10,15,10),
-        oma = c(10, 10, 40, 10), srt = -15)
+        oma = c(10, 10, 40, 10), srt = 0, xpd = TRUE)
     for (i in 1:length(graphs)) {
         g <- graphs[[i]]
         darkgrey <- col2rgb("darkgrey")
@@ -62,7 +80,23 @@ panel_trees <- function(graphs, out_file, main_title, graph_titles, rows, cols){
         title(main = graph_titles[i], cex.main = 5)
         box(which = "plot", lwd=4)
     }
-    title(main = main_title, cex.main = 20, outer = TRUE)
+    # blank plots so that legend is always bottom right
+    if((cols-1)*rows==length(graphs)){
+        for (i in (length(graphs)+1):(cols*rows-1)) {
+            plot(0:1, 0:1, type="n", axes = F, ann=FALSE)
+        }
+    }
+    draw_legend()
+
+        # legend("bottomright",
+        #        legend = c("Elements", "Addition", "Subtraction" ),
+        #        col = c("#8DA0CB",
+        #                "#66C2A5",
+        #                "#FC8D62"),
+        #        pch = c(21, NA, NA), lwd = c(NA, 3, 3),
+        #        pt.bg = unique(V(graphs[[1]])$color),
+        #        cex = 5)
+    title(main = main_title, cex.main = 25, outer = TRUE)
     dev.off()
 }
 
@@ -70,13 +104,13 @@ panel_trees <- function(graphs, out_file, main_title, graph_titles, rows, cols){
 
 stat_nums <- which(substr(statement_names, 10, 18)=="Statement")
 panel_trees(graphs[stat_nums],
-            "./inst/vis/discon_nodes_2017.png",
+            "./inst/vis/stmnt_nodes_2017.png",
             main_title = "2017 Statements: Calculation Link",
             graph_titles = statement_names[stat_nums],
             rows = 4,
             cols = 5)
 panel_trees(graphs[-stat_nums],
-            "./inst/vis/discon_nodes_2017_disc.png",
+            "./inst/vis/disclsr_nodes_2017.png",
             main_title = "2017 Disclosures: Calculation Link",
             graph_titles = statement_names[-stat_nums],
             rows = 7,
