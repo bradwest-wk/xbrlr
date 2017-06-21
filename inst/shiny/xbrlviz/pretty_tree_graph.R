@@ -18,3 +18,6 @@ pretty_tree_graph <- function(statement, df, link, names) {
     par(srt = 290)
     plot_single_graph(graph, statement, title_size = 3, display_names = names)
 }
+
+
+
