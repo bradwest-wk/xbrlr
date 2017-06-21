@@ -4,6 +4,8 @@
 #' Draw a Simple Legend
 #'
 #' This draws a simple legend
+#'
+#' @export
 draw_legend <- function() {
     plot(0:1, 0:1, type="n", axes = F, ann=FALSE)
     # box(which = "plot", lwd = 4)
@@ -21,6 +23,7 @@ draw_legend <- function() {
 #'
 #' Plots a single tree graph
 #'
+#' @export
 #' @param g The graph to plot
 #' @param title The title of the graph
 #' @param title_size Size of title
@@ -72,6 +75,7 @@ plot_single_graph <- function(g, title, title_size = 5,
 #'
 #' Method for plotting panels of statements
 #'
+#' @export
 #' @param graphs a list or vector of graphs to plot
 #' @param out_file the output file to save to
 #' @param main_title the overall title of the graph

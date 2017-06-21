@@ -13,9 +13,9 @@ library(xbrlr)
 #' @param link The link, "Calculation" or "Presentation"
 #' @return A dataframe with the attached x and y coordinates
 rescale_layout <- function(statement, df, link) {
-    stmt_of_interest <- xbrlr:::find_statement(
+    stmt_of_interest <- find_statement(
         statement, df, link)
-    graph <- xbrlr:::create_graph(stmt_of_interest)
+    graph <- create_graph(stmt_of_interest)
     l = igraph::layout_as_tree(graph)
     # need to rescale to -1 to 1 plotting region
     x <- rescale(l[,1], to = c(-1,1))

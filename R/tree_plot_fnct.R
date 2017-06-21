@@ -3,6 +3,7 @@
 #' Saves a png image of a network tree (from an igraph object) at a user
 #' specified size with the given plot tile.
 #'
+#' @export
 #' @param edgelist A csv consisting of two columns (parent and children) of
 #'   relationships between elements
 #' @param usage_file An optional csv of usage counts for the elements with two

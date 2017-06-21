@@ -18,6 +18,7 @@
 #' A method for choosing the correct Calculation or Presentation linkbase sheet
 #' for importing taxonomy relationships.
 #'
+#' @export
 #' @param linkbase Linkbase to choose, either Calculation of Presentation
 #' @return Integer value of the excel sheet that needs to be read in
 #' @examples
@@ -36,6 +37,7 @@ choose_linkbase <- function(linkbase){
 #' A method for extracting the correct linkbase from excel sheet and reading in
 #' as a dataframe.
 #'
+#' @export
 #' @param path Path to xls/xlsx file
 #' @param linkbase Linkbase to choose, either Calculation of Presentation
 #' @return dataframe of excel sheet
@@ -49,6 +51,7 @@ excel_to_df <- function(path, linkbase){
 #' A function for extracting the financial statement of interest from the given
 #' taxonomy.
 #'
+#' @export
 #' @param statement Title of statement of interest as string. Incorrect or vague
 #'   values will throw error. Ideally the statement argument would be in the
 #'   format on
@@ -111,6 +114,7 @@ find_statement <- function(statement, taxonomy, linkbase){
 #' A function for creating a network graph from a statement of interest in the
 #' form of a dataframe.
 #'
+#' @export
 #' @param statement_of_interest A dataframe of the statement of interest, often
 #'   generated from a cal to find_statement. Must have the column names parent
 #'   and child.
@@ -158,6 +162,7 @@ create_graph <- function(statement_of_interest = statement, root_nodes = NA){
 #' Saves the network graph in a tree layout as a png of a large size (5760x5760
 #' pixels)
 #'
+#' @export
 #' @param g Graph to visualize
 #' @param filename Output filename
 #' @param title Title of plot
@@ -193,6 +198,7 @@ plot_graph <- function(g, filename, title){
 #'
 #' Creates statement tree from scratch excel file
 #'
+#' @export
 #' @param taxonomy_path Path to xls/xlsx file
 #' @param linkbase Linkbase to choose, either Calculation of Presentation
 #' @param statement Title of statement of interest as string. Incorrect or vague
@@ -219,6 +225,7 @@ create_statement_tree <- function(taxonomy_path, linkbase, statement, title,
 #' Extracts a subgraph from a larger graph by grabbing children elements
 #' (recursively) of an element of interest.
 #'
+#' @export
 #' @param graph The parent graph from which to extract a subgraph
 #' @param element_of_interest Root node of returned graph as a string. (e.g.
 #'   "Revenues")
@@ -234,6 +241,7 @@ extract_subgraph <- function(graph = g, element_of_interest){
 #'
 #' Visualize the differences between two edgelists
 #'
+#' @export
 #' @param edgelist_large Larger edgelist
 #' @param edgelist_small smaller edgelist.  Only those elements that are not in
 #'   the smaller edgelist will be highlighted

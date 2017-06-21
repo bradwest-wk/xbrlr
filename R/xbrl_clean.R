@@ -12,6 +12,7 @@ source("./R/tree_plot_fnct.R")
 #'
 #' Reads a file in as an excel or a csv and creates an edgelist
 #'
+#' @export
 #' @param edge_file The path to an excel or csv edgefile that contains at
 #' minimum two columns, a parent and a child.
 #' @param sheet If an excel document, the sheet that contains the edges
@@ -63,6 +64,7 @@ edge_to_df <- function(edge_file,
 #' Functionality for obtaining statement names from a given taxonomy, either
 #' presentation link, or calculation
 #'
+#' @export
 #' @param df The dataframe of the link containing elements, definitions, and
 #' linkroles (e.g. calc_link_dirty)
 #' @param link The linkbase to use, either Presentation or Calculation
@@ -81,6 +83,7 @@ get_stmt_names <- function(df, link) {
 #'
 #' Creates a list of igraph objects which can be used to iterate over
 #'
+#' @export
 #' @param statement_names A vector of statement names
 #' @param df A dataframe of the link (e.g. calc_link_dirty)
 #' @param link The linkbase to use, either Presentation or Calculation

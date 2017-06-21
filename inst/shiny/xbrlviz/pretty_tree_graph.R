@@ -18,8 +18,8 @@ library(xbrlr)
 pretty_tree_graph <- function(statement, df, link, names,
                               xlim = c(-1,1), ylim = c(-1,1), zoom
                               ) {
-    stmt_of_interest <- xbrlr:::find_statement(statement, df, link)
-    graph <- xbrlr:::create_graph(stmt_of_interest)
+    stmt_of_interest <- find_statement(statement, df, link)
+    graph <- create_graph(stmt_of_interest)
     par(srt = 290)
     xbrlr:::plot_single_graph(graph, statement, title_size = 3,
                               display_names = names,
