@@ -2,6 +2,7 @@
 # functions for creating igraph objects of messy edgeslists and taxonomy trees.
 
 # Author: Brad West
+library(tidyverse)
 
 # gimme dem functions
 source("./R/xbrl_taxonomy_functions.R")
@@ -69,7 +70,7 @@ edge_to_df <- function(edge_file,
 get_stmt_names <- function(df, link) {
     statement_names <- df[df$prefix=="Definition",]
     statement_names <- statement_names[!is.na(statement_names$prefix),] %>%
-        select(name)
+        dplyr::select(name)
     statement_names <- statement_names$name
     stat_nums <- which(substr(statement_names, 10, 18)=="Statement")
     statement_names[stat_nums]

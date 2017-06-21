@@ -4,7 +4,8 @@
 \alias{plot_single_graph}
 \title{Plot Graph}
 \usage{
-plot_single_graph(g, title, title_size = 5, display_names = FALSE)
+plot_single_graph(g, title, title_size = 5, display_names = FALSE,
+  xlimit = c(-1, 1), ylimit = c(-1, 1), zoom = 1, legend = FALSE)
 }
 \arguments{
 \item{g}{The graph to plot}
@@ -14,6 +15,14 @@ plot_single_graph(g, title, title_size = 5, display_names = FALSE)
 \item{title_size}{Size of title}
 
 \item{display_names}{Whether or not to display names}
+
+\item{xlimit}{The xlimit of the plot to zoom to (max is c(-1,1))}
+
+\item{ylimit}{The ylimit of the plot to zoom to (max is c(-1,1))}
+
+\item{zoom}{Optional zoom parameter for vertex and label size}
+
+\item{legend}{True if lengend is desired}
 }
 \value{
 A graph image

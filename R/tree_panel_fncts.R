@@ -25,8 +25,17 @@ draw_legend <- function() {
 #' @param title The title of the graph
 #' @param title_size Size of title
 #' @param display_names Whether or not to display names
+#' @param xlimit The xlimit of the plot to zoom to (max is c(-1,1))
+#' @param ylimit The ylimit of the plot to zoom to (max is c(-1,1))
+#' @param zoom Optional zoom parameter for vertex and label size
+#' @param legend True if lengend is desired
 #' @return A graph image
-plot_single_graph <- function(g, title, title_size = 5, display_names = FALSE) {
+plot_single_graph <- function(g, title, title_size = 5,
+                              display_names = FALSE,
+                              xlimit = c(-1,1),
+                              ylimit = c(-1,1),
+                              zoom = 1,
+                              legend = FALSE) {
     darkgrey <- col2rgb("darkgrey")
     framecolor <- rgb(darkgrey[1,1], darkgrey[2,1], darkgrey[3,1],
                       alpha = 75,
@@ -36,16 +45,25 @@ plot_single_graph <- function(g, title, title_size = 5, display_names = FALSE) {
         g, root = roots, rootlevel = c(rep(1, length(roots)))),
         vertex.color = igraph::V(g)$color,
         vertex.label = if(display_names) igraph::V(g)$name else NA,
-        vertex.label.cex = 1,
+        vertex.label.cex = 2*log10(zoom+2),
         # ifelse(igraph::V(g)$depth<1, igraph::V(g)$name, NA),
         vertex.frame.color = framecolor, vertex.shape = "circle",
-        vertex.size = 3,
+        vertex.size = 2*log10(zoom+3),
         vertex.label.dist = 0, vertex.label.degree = pi/2,
         vertex.label.color = "black",
         edge.arrow.size = .5, edge.arrow.width = 2, asp = 0,
         edge.curved = F,
         edge.color = igraph::E(g)$color,
-        edge.width = 2)
+        edge.width = 2, xlim = xlimit, ylim = ylimit)
+    if (legend) {
+        legend("bottomright",
+               legend = c("Elements", "Addition", "Subtraction"),
+               col = c("#8DA0CB", "#66C2A5", "#FC8D62"),
+               lwd = c(NA, 4, 4),
+               pch = c(21, NA, NA),
+               pt.bg = "#8DA0CB",
+               pt.cex = 3)
+    }
     title(main = title, cex.main = title_size)
 }
 
