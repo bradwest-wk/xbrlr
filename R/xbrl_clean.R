@@ -56,3 +56,39 @@ edge_to_df <- function(edge_file,
     edges
 }
 
+
+#' Get Statement Names
+#'
+#' Functionality for obtaining statement names from a given taxonomy, either
+#' presentation link, or calculation
+#'
+#' @param df The dataframe of the link containing elements, definitions, and
+#' linkroles (e.g. calc_link_dirty)
+#' @param link The linkbase to use, either Presentation or Calculation
+#' @return A vector of statement names
+get_stmt_names <- function(df, link) {
+    statement_names <- df[df$prefix=="Definition",]
+    statement_names <- statement_names[!is.na(statement_names$prefix),] %>%
+        select(name)
+    statement_names <- statement_names$name
+    stat_nums <- which(substr(statement_names, 10, 18)=="Statement")
+    statement_names[stat_nums]
+}
+
+
+#' List of graphs
+#'
+#' Creates a list of igraph objects which can be used to iterate over
+#'
+#' @param statement_names A vector of statement names
+#' @param df A dataframe of the link (e.g. calc_link_dirty)
+#' @param link The linkbase to use, either Presentation or Calculation
+#' @return A list of igraph objects
+create_graph_list <- function(statement_names, df, link) {
+    graphs <- vector("list", length(statement_names))
+    for (i in 1:length(statement_names)) {
+        stmt_df <- find_statement(statement_names[i], df, link)
+        graphs[[i]] <- create_graph(stmt_df)
+    }
+}
+
