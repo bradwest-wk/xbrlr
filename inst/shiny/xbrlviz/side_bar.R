@@ -10,7 +10,7 @@ library(xbrlr)
 #' @param link The link to use
 #' @return A sidebarPanel object
 create_sidebar <- function(df, link) {
-    statement_names <- get_stmt_names(df, link)
+    statement_names <- xbrlr:::get_stmt_names(df, link)
     selectInput(
         "statement", "Statement:", choices = statement_names,
         multiple = FALSE
