@@ -13,6 +13,7 @@ source("./layout_rescale.R")
 # on whether Presentation or Calculation is selected. Or have ifelse statement
 # in the create sidebar
 load("./data/calc_link_dirty.Rdata")
+load("./data/present_link_dirty.Rdata")
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
@@ -26,11 +27,24 @@ ui <- fluidPage(
           radioButtons(inputId = "link",
                        label = "Linkbase",
                        choices = c(
-                           "Calculation"
+                           "Calculation",
+                           "Presentation"
                            ),
                        selected = "Calculation"),
+          # selectInput(
+          #     "statement", "Statement:", choices = "Loading...",
+          #     multiple = FALSE
+          # ),
           # inputID = "statement"
-          create_sidebar(calc_link_dirty, input$link),
+          # conditionalPanel(
+          #     condition = "input.link == 'Calculation'",
+          #     create_sidebar(calc_link_dirty, input$link)
+          # ),
+          # conditionalPanel(
+          #     condition = "input.link == 'Presentation'",
+          #     create_sidebar(present_link_dirty, input$link)
+          # ),
+          uiOutput("selectBar"),
           radioButtons(inputId = "names", label = "Show Element Names?",
                        choices = c("Yes" = TRUE, "No" = FALSE),
                        selected = FALSE)
@@ -46,15 +60,52 @@ ui <- fluidPage(
           h3("Clicked Element"),
           DT::dataTableOutput("plot_clicked_points"),
           h3("Selected Elements"),
-          DT::dataTableOutput("plot_brushed_points")
+          DT::dataTableOutput("plot_brushed_points"),
+          verbatimTextOutput("dataset")
       )
    )
 )
 
 
-server <- function(input, output) {
+server <- function(input, output, session) {
 
     ranges <- reactiveValues(x = c(-1,1), y = c(-1,1))
+
+    # observe({
+    #     if (input$link=="Calculation") {
+    #         updateSelectInput(
+    #             session, "statement",
+    #             choices = get_stmt_names(calc_link_dirty, input$link))
+    #     } else if (input$link == "Presentation") {
+    #         updateSelectInput(
+    #             session, "statement",
+    #             choices = get_stmt_names(calc_link_dirty, input$link))
+    #     }
+    # })
+    datasetInput <- reactive({
+        switch(input$link,
+               "Calculation" = calc_link_dirty,
+               "Presentation" = present_link_dirty)
+    })
+
+    output$dataset <- renderPrint({ head(datasetInput()) })
+
+    # perhaps the answer to the how to abstract the selectInput function in the UI
+    output$selectBar <- renderUI({
+        selectInput(
+            "statement", "Statement:",
+            choices = get_stmt_names(datasetInput(), input$link),
+            multiple = FALSE
+        )
+    })
+
+    # output$dataset <- reactive({
+    #     if (input$link=="Calculation") {
+    #         calc_link_dirty
+    #     } else if (input$link == "Presentation") {
+    #         present_link_dirty
+    #     }
+    # })
 
     # output$tree <- renderSvgPanZoom({
     #     # plot.window(xlim = if (!is.null(ranges$x)) ranges$x else c(-1,1),
@@ -72,7 +123,7 @@ server <- function(input, output) {
         # plot.window(xlim = if (!is.null(ranges$x)) ranges$x else c(-1,1),
                     # ylim =  if (!is.null(ranges$y)) ranges$y else c(-1,1))
         zoom_level <- 2 / (ranges$x[2] - ranges$x[1])
-        pretty_tree_graph(input$statement, calc_link_dirty, input$link,
+        pretty_tree_graph(input$statement, datasetInput(), input$link,
                           names = input$names,
                           xlim = ranges$x,
                           ylim = ranges$y,
@@ -86,7 +137,7 @@ server <- function(input, output) {
     #     nearPoints(coord_df, input$plot_click, xvar = "x", yvar = "y")
     # })
     output$plot_clicked_points <- DT::renderDataTable({
-        coord_df <- rescale_layout(input$statement, calc_link_dirty,
+        coord_df <- rescale_layout(input$statement, datasetInput(),
                                    input$link)
         res <- nearPoints(
             coord_df, input$plot_click, xvar = "x", yvar = "y")[, c(4:7)]
@@ -99,7 +150,7 @@ server <- function(input, output) {
     })
 
     output$plot_brushed_points <- DT::renderDataTable({
-        coord_df <- rescale_layout(input$statement, calc_link_dirty,
+        coord_df <- rescale_layout(input$statement, datasetInput(),
                                    input$link)
         res <- brushedPoints(
             coord_df, input$plot_brush, xvar = "x", yvar = "y")[, c(4:7)]
