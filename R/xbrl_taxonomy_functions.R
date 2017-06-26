@@ -130,16 +130,21 @@ create_graph <- function(statement_of_interest = statement, root_nodes = NA){
     roots <- which(igraph::degree(g, v = igraph::V(g), mode = "in")==0)
     # Add weight and depth attribute to graph
     if("weight" %in% colnames(statement_of_interest)){
-        igraph::V(g)$weight <- statement_of_interest$weight
-        # [which(
-        #     igraph::V(g)$name==statement_of_interest$child)]
+        igraph::V(g)$weight <- dplyr::left_join(
+            as.data.frame(igraph::V(g)$name, stringsAsFactors = FALSE),
+            statement_of_interest[,c("child", "weight")],
+            by = c("igraph::V(g)$name"="child"))$weight
     }
-    igraph::V(g)$depth <- statement_of_interest$depth
-    # [which(
-    #     igraph::V(g)$name==statement_of_interest$child)]
-    igraph::V(g)$label <- statement_of_interest$label
-    # [which(
-    #     igraph::V(g)$name==statement_of_interest$child)]
+
+    igraph::V(g)$depth <- dplyr::left_join(
+        as.data.frame(igraph::V(g)$name, stringsAsFactors = FALSE),
+        statement_of_interest[,c("child", "depth")],
+        by = c("igraph::V(g)$name"="child"))$depth
+    igraph::V(g)$label <- dplyr::left_join(
+        as.data.frame(igraph::V(g)$name, stringsAsFactors = FALSE),
+        statement_of_interest[,c("child", "label")],
+        by = c("igraph::V(g)$name"="child"))$label
+
 
     igraph::E(g)$color <- colors[1]
     igraph::V(g)$color <- colors[3]

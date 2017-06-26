@@ -16,12 +16,21 @@ rescale_layout <- function(statement, df, link) {
     stmt_of_interest <- find_statement(
         statement, df, link)
     graph <- create_graph(stmt_of_interest)
-    l = igraph::layout_as_tree(graph)
+    l <-  igraph::layout_as_tree(graph)
     # need to rescale to -1 to 1 plotting region
     x <- rescale(l[,1], to = c(-1,1))
     y <- rescale(l[,2], to = c(-1,1))
     # bind the coordinates to the statement
-    coord_df <- cbind(x,y,stmt_of_interest)
+    # coord_df <- cbind(x,y, stmt_of_interest)
+    # cbind makes does not preserve correct class for x and y (num -> character)
+    name_coords <- cbind.data.frame(x,y, igraph::V(graph)$name,
+                                    stringsAsFactors = F)
+    colnames(name_coords) <- c("x", "y", "child")
+    coord_df2 <- dplyr::left_join(name_coords,
+                                 stmt_of_interest,
+                                 by = "child")
+    # for some reason need to change the type back to
+    coord_df2
 }
 
 

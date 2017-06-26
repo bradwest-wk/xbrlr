@@ -4,6 +4,7 @@ library(scales)
 library(DT)
 
 # To Do:
+# 1. Reset double click on switching input$link
 # 2. Fix datafrome issue
 # -- look at cbind output vs left join/merge
 
@@ -51,8 +52,8 @@ ui <- fluidPage(
           h3("Clicked Element"),
           DT::dataTableOutput("plot_clicked_points"),
           h3("Selected Elements"),
-          DT::dataTableOutput("plot_brushed_points"),
-          verbatimTextOutput("dataset")
+          DT::dataTableOutput("plot_brushed_points")
+          # verbatimTextOutput("dataset")
       )
    )
 )
@@ -78,14 +79,14 @@ server <- function(input, output, session) {
         )
     })
 
-    output$dataset <- renderPrint({
-        req(input$statement, input$link)
-        nearPoints(rescale_layout(input$statement, datasetInput(),
-                       input$link),
-                   input$plot_click,
-                   xvar = "x", yvar = "y",
-                   threshold = 10)
-        })
+    # output$dataset <- renderPrint({
+    #     req(input$statement, input$link)
+    #     nearPoints(rescale_layout(input$statement, datasetInput(),
+    #                    input$link),
+    #                input$plot_click,
+    #                xvar = "x", yvar = "y",
+    #                threshold = 10)
+    #     })
 
     output$tree <- renderPlot({
         req(input$statement)
@@ -98,6 +99,7 @@ server <- function(input, output, session) {
     })
 
     output$plot_clicked_points <- DT::renderDataTable({
+        req(input$statement, input$link)
         coord_df <- rescale_layout(input$statement, datasetInput(),
                                    input$link)
         res <- nearPoints(
@@ -119,6 +121,7 @@ server <- function(input, output, session) {
     })
 
     output$plot_brushed_points <- DT::renderDataTable({
+        req(input$statement, input$link)
         coord_df <- rescale_layout(input$statement, datasetInput(),
                                    input$link)
         res <- brushedPoints(
