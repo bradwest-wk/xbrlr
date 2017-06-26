@@ -4,7 +4,7 @@
 \alias{plot_single_graph}
 \title{Plot Graph}
 \usage{
-plot_single_graph(g, title, title_size = 5, display_names = FALSE,
+plot_single_graph(g, title, title_size = 1, display_names = FALSE,
   xlimit = c(-1, 1), ylimit = c(-1, 1), zoom = 1, legend = FALSE)
 }
 \arguments{

@@ -5,9 +5,7 @@ library(DT)
 
 # To Do:
 # 1. Reset double click on switching input$link
-# 2. Fix datafrome issue
-# -- look at cbind output vs left join/merge
-
+# 2. legend in plot
 
 source("./side_bar.R")
 source("./pretty_tree_graph.R")
@@ -22,46 +20,59 @@ load("./data/present_link_dirty.Rdata")
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
+    verticalLayout(
+        titlePanel("XBRL Viewer: 2017 Taxonomy"),
+        wellPanel(
+            fluidRow(
+                column(1, radioButtons(inputId = "link",
+                                       label = "Linkbase",
+                                       choices = c(
+                                           "Calculation",
+                                           "Presentation"
+                                       ),
+                                       selected = "Calculation")
+                ),
+                column(7, uiOutput("selectBar")
+                ),
+                column(1, radioButtons(
+                    inputId = "names", label = "Show Element Names?",
+                    choices = c("Yes" = TRUE, "No" = FALSE),
+                    selected = FALSE)
+                ),
+                column(3,
+                       # h5("Notes", align = "center"),
+                       htmlOutput("instructions"))
+            )
+        ),
 
-   # Application title
-   titlePanel("XBRL Viewer: 2017 Taxonomy"),
+        plotOutput("tree", width="100%", height = "900px",
+                   click = "plot_click",
+                   brush = brushOpts(id = "plot_brush", resetOnNew = TRUE),
+                   dblclick = "plot_dblclick"
+        ),
 
-   # Sidebar with a slider input for number of bins
-   sidebarLayout(
-      sidebarPanel(
-          radioButtons(inputId = "link",
-                       label = "Linkbase",
-                       choices = c(
-                           "Calculation",
-                           "Presentation"
-                           ),
-                       selected = "Calculation"),
-          uiOutput("selectBar"),
-          radioButtons(inputId = "names", label = "Show Element Names?",
-                       choices = c("Yes" = TRUE, "No" = FALSE),
-                       selected = FALSE)
-          ),
-
-      mainPanel(
-          # height fills 15in retina screen
-          plotOutput("tree", width="1300px", height = "800px",
-                     click = "plot_click",
-                     brush = brushOpts(id = "plot_brush", resetOnNew = TRUE),
-                     dblclick = "plot_dblclick"
-                     ),
-          h3("Clicked Element"),
-          DT::dataTableOutput("plot_clicked_points"),
-          h3("Selected Elements"),
-          DT::dataTableOutput("plot_brushed_points")
-          # verbatimTextOutput("dataset")
-      )
-   )
+        # br(),
+        # br(),
+        # h3("Clicked Element"),
+        # DT::dataTableOutput("plot_clicked_points"),
+        # br(),
+        h3("Selected Elements", align = "center"),
+        DT::dataTableOutput("plot_brushed_points"),
+        htmlOutput("credit")
+    )
 )
 
 
 server <- function(input, output, session) {
 
     ranges <- reactiveValues(x = c(-1,1), y = c(-1,1))
+
+    output$instructions <-
+        renderText("Click and drag to select nodes and view element info below.
+                   Double click to zoom on selected nodes. Edges colored
+                   according to addition/subtraction relationship. Work in
+                   progress. Contact brad dot west at workiva dot com with
+                   questions or feature requests.")
 
     datasetInput <- reactive({
         req(input$link)
@@ -79,17 +90,8 @@ server <- function(input, output, session) {
         )
     })
 
-    # output$dataset <- renderPrint({
-    #     req(input$statement, input$link)
-    #     nearPoints(rescale_layout(input$statement, datasetInput(),
-    #                    input$link),
-    #                input$plot_click,
-    #                xvar = "x", yvar = "y",
-    #                threshold = 10)
-    #     })
-
     output$tree <- renderPlot({
-        req(input$statement)
+        req(input$statement, input$link, input$names)
         zoom_level <- 2 / (ranges$x[2] - ranges$x[1])
         pretty_tree_graph(input$statement, datasetInput(), input$link,
                           names = input$names,
@@ -98,27 +100,27 @@ server <- function(input, output, session) {
                           zoom = zoom_level)
     })
 
-    output$plot_clicked_points <- DT::renderDataTable({
-        req(input$statement, input$link)
-        coord_df <- rescale_layout(input$statement, datasetInput(),
-                                   input$link)
-        res <- nearPoints(
-            coord_df, input$plot_click,
-            xvar = "x", yvar = "y",
-            threshold = 10)[, c(4:ncol(coord_df))]
-        datatable(res,
-                  colnames = if (input$link=="Calculation"){
-                      c("Element Label",
-                        "Depth From Root",
-                        "Add/Subtract",
-                        "Parent Element Name")
-                  } else if (input$link=="Presentation"){
-                      c("Element Label",
-                        "Depth From Root",
-                        "Parent Element Name")
-                  })
-
-    })
+    # output$plot_clicked_points <- DT::renderDataTable({
+    #     req(input$statement, input$link)
+    #     coord_df <- rescale_layout(input$statement, datasetInput(),
+    #                                input$link)
+    #     res <- nearPoints(
+    #         coord_df, input$plot_click,
+    #         xvar = "x", yvar = "y",
+    #         threshold = 10)[, c(4:ncol(coord_df))]
+    #     datatable(res,
+    #               colnames = if (input$link=="Calculation"){
+    #                   c("Element Label",
+    #                     "Depth From Root",
+    #                     "Add/Subtract",
+    #                     "Parent Element Name")
+    #               } else if (input$link=="Presentation"){
+    #                   c("Element Label",
+    #                     "Depth From Root",
+    #                     "Parent Element Name")
+    #               })
+    #
+    # })
 
     output$plot_brushed_points <- DT::renderDataTable({
         req(input$statement, input$link)
@@ -151,6 +153,10 @@ server <- function(input, output, session) {
             ranges$y <- c(-1,1)
         }
     })
+
+    # output$credit <- renderText("Work in progress.  Contact brad dot west at
+    #                             workiva dot com with questions or feature
+    #                             requests")
 }
 
 # Run the application
