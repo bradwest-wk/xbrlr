@@ -45,13 +45,13 @@
     vertex_color_new <- RColorBrewer::brewer.pal(5, "Set2")[4]
     edge_color_new <- RColorBrewer::brewer.pal(5, "Set2")[5]
 
-    par(mfrow= c(1,2), srt = 0, cex = .75)
-    igraph::plot.igraph(g_old, layout = igraph::layout_as_tree(g_old),
-                        vertex.label.cex = 1, vertex.color = vertex_color_old,
-                        edge.color = edge_color_old)
-    igraph::plot.igraph(g_new, layout = igraph::layout_as_tree(g_new),
-                        vertex.label.cex = 1, vertex.color = vertex_color_new,
-                        edge.color = edge_color_new)
+    # par(mfrow= c(1,2), srt = 0, cex = .75)
+    # igraph::plot.igraph(g_old, layout = igraph::layout_as_tree(g_old),
+    #                     vertex.label.cex = 1, vertex.color = vertex_color_old,
+    #                     edge.color = edge_color_old)
+    # igraph::plot.igraph(g_new, layout = igraph::layout_as_tree(g_new),
+    #                     vertex.label.cex = 1, vertex.color = vertex_color_new,
+    #                     edge.color = edge_color_new)
 
 # Functions for Plotting ======================================================
 
