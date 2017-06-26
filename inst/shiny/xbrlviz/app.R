@@ -3,6 +3,10 @@ library(xbrlr)
 library(scales)
 library(DT)
 
+# To Do:
+# 2. Fix datafrome issue
+# -- look at cbind output vs left join/merge
+
 
 source("./side_bar.R")
 source("./pretty_tree_graph.R")
@@ -31,19 +35,6 @@ ui <- fluidPage(
                            "Presentation"
                            ),
                        selected = "Calculation"),
-          # selectInput(
-          #     "statement", "Statement:", choices = "Loading...",
-          #     multiple = FALSE
-          # ),
-          # inputID = "statement"
-          # conditionalPanel(
-          #     condition = "input.link == 'Calculation'",
-          #     create_sidebar(calc_link_dirty, input$link)
-          # ),
-          # conditionalPanel(
-          #     condition = "input.link == 'Presentation'",
-          #     create_sidebar(present_link_dirty, input$link)
-          # ),
           uiOutput("selectBar"),
           radioButtons(inputId = "names", label = "Show Element Names?",
                        choices = c("Yes" = TRUE, "No" = FALSE),
@@ -71,27 +62,15 @@ server <- function(input, output, session) {
 
     ranges <- reactiveValues(x = c(-1,1), y = c(-1,1))
 
-    # observe({
-    #     if (input$link=="Calculation") {
-    #         updateSelectInput(
-    #             session, "statement",
-    #             choices = get_stmt_names(calc_link_dirty, input$link))
-    #     } else if (input$link == "Presentation") {
-    #         updateSelectInput(
-    #             session, "statement",
-    #             choices = get_stmt_names(calc_link_dirty, input$link))
-    #     }
-    # })
     datasetInput <- reactive({
+        req(input$link)
         switch(input$link,
                "Calculation" = calc_link_dirty,
                "Presentation" = present_link_dirty)
     })
 
-    output$dataset <- renderPrint({ head(datasetInput()) })
-
-    # perhaps the answer to the how to abstract the selectInput function in the UI
     output$selectBar <- renderUI({
+        req(input$link)
         selectInput(
             "statement", "Statement:",
             choices = get_stmt_names(datasetInput(), input$link),
@@ -99,29 +78,17 @@ server <- function(input, output, session) {
         )
     })
 
-    # output$dataset <- reactive({
-    #     if (input$link=="Calculation") {
-    #         calc_link_dirty
-    #     } else if (input$link == "Presentation") {
-    #         present_link_dirty
-    #     }
-    # })
-
-    # output$tree <- renderSvgPanZoom({
-    #     # plot.window(xlim = if (!is.null(ranges$x)) ranges$x else c(-1,1),
-    #     # ylim =  if (!is.null(ranges$y)) ranges$y else c(-1,1))
-    #     zoom_level <- 2 / (ranges$x[2] - ranges$x[1])
-    #     g <- pretty_tree_graph(input$statement, calc_link_dirty, input$link,
-    #                       names = input$names,
-    #                       xlim = ranges$x,
-    #                       ylim = ranges$y,
-    #                       zoom = zoom_level)
-    #     svgPanZoom(g, controlIconsEnabled = TRUE)
-    # })
+    output$dataset <- renderPrint({
+        req(input$statement, input$link)
+        nearPoints(rescale_layout(input$statement, datasetInput(),
+                       input$link),
+                   input$plot_click,
+                   xvar = "x", yvar = "y",
+                   threshold = 10)
+        })
 
     output$tree <- renderPlot({
-        # plot.window(xlim = if (!is.null(ranges$x)) ranges$x else c(-1,1),
-                    # ylim =  if (!is.null(ranges$y)) ranges$y else c(-1,1))
+        req(input$statement)
         zoom_level <- 2 / (ranges$x[2] - ranges$x[1])
         pretty_tree_graph(input$statement, datasetInput(), input$link,
                           names = input$names,
@@ -130,35 +97,44 @@ server <- function(input, output, session) {
                           zoom = zoom_level)
     })
 
-    # get the layout of the graph
-    # output$info <- renderPrint({
-    #     coord_df <- rescale_layout(input$statement, calc_link_dirty,
-    #                                input$link)
-    #     nearPoints(coord_df, input$plot_click, xvar = "x", yvar = "y")
-    # })
     output$plot_clicked_points <- DT::renderDataTable({
         coord_df <- rescale_layout(input$statement, datasetInput(),
                                    input$link)
         res <- nearPoints(
-            coord_df, input$plot_click, xvar = "x", yvar = "y")[, c(4:7)]
+            coord_df, input$plot_click,
+            xvar = "x", yvar = "y",
+            threshold = 10)[, c(4:ncol(coord_df))]
         datatable(res,
-                  colnames =
+                  colnames = if (input$link=="Calculation"){
                       c("Element Label",
                         "Depth From Root",
                         "Add/Subtract",
-                        "Parent Element Name"))
+                        "Parent Element Name")
+                  } else if (input$link=="Presentation"){
+                      c("Element Label",
+                        "Depth From Root",
+                        "Parent Element Name")
+                  })
+
     })
 
     output$plot_brushed_points <- DT::renderDataTable({
         coord_df <- rescale_layout(input$statement, datasetInput(),
                                    input$link)
         res <- brushedPoints(
-            coord_df, input$plot_brush, xvar = "x", yvar = "y")[, c(4:7)]
-        datatable(res, colnames =
+            coord_df, input$plot_brush,
+            xvar = "x", yvar = "y")[, c(4:ncol(coord_df))]
+        datatable(res,
+                  colnames = if (input$link=="Calculation"){
                       c("Element Label",
                         "Depth From Root",
                         "Add/Subtract",
-                        "Parent Element Name"))
+                        "Parent Element Name")
+                  } else if (input$link=="Presentation"){
+                      c("Element Label",
+                        "Depth From Root",
+                        "Parent Element Name")
+                  })
     })
 
     observeEvent(input$plot_dblclick, {
