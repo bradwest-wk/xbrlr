@@ -33,7 +33,7 @@ draw_legend <- function() {
 #' @param zoom Optional zoom parameter for vertex and label size
 #' @param legend True if lengend is desired
 #' @return A graph image
-plot_single_graph <- function(g, title, title_size = 5,
+plot_single_graph <- function(g, title, title_size = 1,
                               display_names = FALSE,
                               xlimit = c(-1,1),
                               ylimit = c(-1,1),
@@ -48,13 +48,13 @@ plot_single_graph <- function(g, title, title_size = 5,
         g, root = roots, rootlevel = c(rep(1, length(roots)))),
         vertex.color = igraph::V(g)$color,
         vertex.label = if(display_names) igraph::V(g)$name else NA,
-        vertex.label.cex = 2*log10(zoom+2),
+        vertex.label.cex = 2*log(zoom+3, 20),
         # ifelse(igraph::V(g)$depth<1, igraph::V(g)$name, NA),
         vertex.frame.color = framecolor, vertex.shape = "circle",
-        vertex.size = 2*log10(zoom+3),
+        vertex.size = zoom^(-0.5), # 2*log(zoom+3, 10),
         vertex.label.dist = 0, vertex.label.degree = pi/2,
         vertex.label.color = "black",
-        edge.arrow.size = .5, edge.arrow.width = 2, asp = 0,
+        edge.arrow.size = .3, edge.arrow.width = 2, asp = 0,
         edge.curved = F,
         edge.color = igraph::E(g)$color,
         edge.width = 2, xlim = xlimit, ylim = ylimit)
@@ -67,7 +67,8 @@ plot_single_graph <- function(g, title, title_size = 5,
                pt.bg = "#8DA0CB",
                pt.cex = 3)
     }
-    title(main = title, cex.main = title_size)
+    # title(main = title, cex.main = title_size)
+    text(1,1.2, labels = title, cex = title_size, adj = c(1, 1), srt = 0)
 }
 
 
