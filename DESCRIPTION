@@ -18,6 +18,7 @@ Imports:
     RColorBrewer,
     readr,
     readxl,
+    shiny,
     stringr,
     tidyr
 Depends: R (>= 3.3.3)

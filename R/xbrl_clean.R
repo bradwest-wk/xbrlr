@@ -2,7 +2,6 @@
 # functions for creating igraph objects of messy edgeslists and taxonomy trees.
 
 # Author: Brad West
-library(tidyverse)
 
 # gimme dem functions
 source("./R/xbrl_taxonomy_functions.R")
