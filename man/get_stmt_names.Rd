@@ -4,13 +4,13 @@
 \alias{get_stmt_names}
 \title{Get Statement Names}
 \usage{
-get_stmt_names(df, link)
+get_stmt_names(df, type = "Statement")
 }
 \arguments{
 \item{df}{The dataframe of the link containing elements, definitions, and
 linkroles (e.g. calc_link_dirty)}
 
-\item{link}{The linkbase to use, either Presentation or Calculation}
+\item{type}{What type of statement to look for, statement or disclosure}
 }
 \value{
 A vector of statement names
