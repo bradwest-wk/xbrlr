@@ -1,0 +1,53 @@
+---
+title: "Visualizing US GAAP Taxonomy Inconsistency"
+author: "Brad West"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: html_document
+runtime: shiny
+---
+
+```{r setup, include=FALSE, message = F, warning = F}
+knitr::opts_chunk$set(echo = TRUE, root.dir = "../../", message = F, warning = F)
+library(xbrlr)
+```
+
+## Motivation
+
+In a recent letter[^1](06-15-2017) responding to an invitation to comment on the FASB's addessment of the efficiency and effectiveness of the US-GAAP Taxonomy, Workiva expressed a number of concerns and attributed issues with the taxonomy to the following:
+
+*"The Taxonomy and the guidelines established by the SEC Interactive Data Rules currently allow the same type of information for similar events or transactions (in general or by industry) to be tagged inconsistently across companies."* 
+
+In short, there is a lack of consistency of XBRL data insofar as different modeling (i.e. tagging) techniques are used for the same us-gaap reporting requirements.
+
+Workiva propsed changes be made to the Taxonomy and the SEC Guidelines, including the following:
+    * Each reporting requirement should be represented by a standard element.
+    * Each element in the Taxonomy should represent a discrete reporting requirement or a widely recongnised, commonly used disclosure practice. In other words, a standard element should represent only one meaning for reporting purposed.  If a single element in the taxonomy has two different meanings for entities of different industries, then that element should be converted to two standard elements to represent those two meanings.
+    * Axes should be standardized, and where applicable, simplified for GAAP reporting requirements.
+    
+In order to proceed with these changes, Workiva suggested a comprehensive review of the taxonomy including:
+    * ensuring that there is a complete calculation relationship for quantitative reporting requirements.
+    * identify:
+        + modeling inconsistencies or standard elements that provide multiple ways to tag the facts.
+        + those specific situations where extensions are necessary.
+
+```{r data}
+getwd()
+load("../../data/calc_link_dirty.Rdata")
+unq_names <- calc_link_dirty %>% filter(prefix == "us-gaap") %>% 
+    select(name) %>% distinct() %>% summarise(n())
+stmt_names <- get_stmt_names(calc_link_dirty, "Calculation", "Statement")
+disc_names <- get_stmt_names(calc_link_dirty, "Calculation", "Disclosure")
+```
+
+One issue with indentifying these inconsistencies is the ability to visualize the ambiguity of a single element's meaning.  The 2017 US GAAP Financial Reporting Taxonomy, calculation relationship contains `r unq_names[1,1]` unique elements, `r length(stmt_names)` statements, and `r length(disc_names)` disclosures.  The sheer breadth of the taxonomy makes it difficult, even for those with an accounting skillset to quickly recognize the overlap beteen elements.
+
+A common tool for quick exploration of a network such as the taxonomy is a network graph.  We can examine the networks on a number of scales.  The "cleanest" scale is that of the individual statements.  These statements do not generally have duplicate elements, and the nested structure of the calculation relationships lends itself to a hierarchical presentation.
+
+```{r, clean_statement}
+
+```
+
+
+```{r pretty_tree}
+
+```
