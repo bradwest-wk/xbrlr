@@ -66,14 +66,14 @@ edge_to_df <- function(edge_file,
 #' @export
 #' @param df The dataframe of the link containing elements, definitions, and
 #' linkroles (e.g. calc_link_dirty)
-#' @param link The linkbase to use, either Presentation or Calculation
+#' @param type What type of statement to look for, statement or disclosure
 #' @return A vector of statement names
-get_stmt_names <- function(df, link) {
+get_stmt_names <- function(df, type = "Statement") {
     statement_names <- df[df$prefix=="Definition",]
     statement_names <- statement_names[!is.na(statement_names$prefix),] %>%
         dplyr::select(name)
     statement_names <- statement_names$name
-    stat_nums <- which(substr(statement_names, 10, 18)=="Statement")
+    stat_nums <- which(substr(statement_names, 10, 9+nchar(type))==type)
     statement_names[stat_nums]
 }
 

@@ -85,13 +85,13 @@ server <- function(input, output, session) {
         req(input$link)
         selectInput(
             "statement", "Statement:",
-            choices = get_stmt_names(datasetInput(), input$link),
+            choices = get_stmt_names(datasetInput()),
             multiple = FALSE
         )
     })
 
     output$tree <- renderPlot({
-        req(input$statement, input$link, input$names)
+        req(input$statement)
         zoom_level <- 2 / (ranges$x[2] - ranges$x[1])
         pretty_tree_graph(input$statement, datasetInput(), input$link,
                           names = input$names,
@@ -123,7 +123,7 @@ server <- function(input, output, session) {
     # })
 
     output$plot_brushed_points <- DT::renderDataTable({
-        req(input$statement, input$link)
+        req(input$statement)
         coord_df <- rescale_layout(input$statement, datasetInput(),
                                    input$link)
         res <- brushedPoints(
