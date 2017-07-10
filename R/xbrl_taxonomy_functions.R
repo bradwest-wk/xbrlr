@@ -116,7 +116,7 @@ find_statement <- function(statement, taxonomy, linkbase){
 #'
 #' @export
 #' @param statement_of_interest A dataframe of the statement of interest, often
-#'   generated from a cal to find_statement. Must have the column names parent
+#'   generated from a call to find_statement. Must have the column names parent
 #'   and child.
 #' @param root_nodes A character vector of element names to place at the highest
 #'   level of the graph. This function increases the root_nodes display size.
@@ -261,6 +261,7 @@ visualize_differences <- function(edgelist_large, edgelist_small){
 
     return(g_large)
 }
+
 
 
 

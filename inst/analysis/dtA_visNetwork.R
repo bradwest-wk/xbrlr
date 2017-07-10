@@ -4,6 +4,7 @@ library(visNetwork)
 library(xbrlr)
 library(tidyverse)
 library(RColorBrewer)
+library(igraph)
 
 # =============================================================================
 # visNetwork needs at least two pieces of information:
@@ -112,5 +113,5 @@ edges <- as_tibble(edges) %>%
 
 visNetwork(nodes, edges)
 # =============================================================================
-# lets look at the comprehensive statements:
-stmts <- get_stmt_names(calc_link_dirty,"Statement")
+
+

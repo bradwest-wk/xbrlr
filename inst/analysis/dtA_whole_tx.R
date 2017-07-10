@@ -84,5 +84,56 @@ plot_graph_local <- function(g, filename, title) {
 plot_graph_local(g2, "./inst/vis/whole_tx_drl.png",
                  "2017 Calculation Link Taxonomy: Test")
 
+# =============================================================================
+# lets look at the comprehensive statements:
+load("./data/calc_link_dirty.Rdata")
+stmts <- get_stmt_names(calc_link_dirty,"Statement")
+stmts <- stmts[c(1,2,5,7,8,9,11)]
+clink <- find_statement(stmts[1], calc_link_dirty, "Calculation")
+for (stmt in stmts[2:length(stmts)]) {
+    stmt_of_interest <- find_statement(stmt, calc_link_dirty, "Calculation")
+    clink <- bind_rows(clink, stmt_of_interest)
+}
+g2 <- create_graph(clink)
 
+multiple_col <- brewer.pal(5, "Set2")[4]
+for (i in length(V(g2))) {
+    if (i %% 2 == 0 {
+        V(g2)[i]$color <- multiple_col
+    })
+    # if (degree(g2, V(g2)[i], mode = "out") > 1 |
+    #     (degree(g2, V(g2)[i], mode = "in") > 1)) {
+    #     V(g2)[i]$color <- multiple_col
+    # }
+}
 
+# This is what you need to do:
+
+plot_graph_local <- function(g, filename, title) {
+    darkgrey <- col2rgb("darkgrey")
+    framecolor <- rgb(darkgrey[1,1], darkgrey[2,1], darkgrey[3,1], alpha = 75,
+                      max = 255)
+    roots <- which(igraph::degree(g, v = igraph::V(g), mode = "in")==0)
+    png(filename = filename, width = 5760, height = 5760, res = 100)
+    par(cex = 1, cex.main = 5, cex.sub = 4, srt = 270, mar = c(20,4,10,4),
+        font.lab = 2, adj = 0)
+    igraph::plot.igraph(g, layout = igraph::layout_as_tree(g, root = roots, circular = T),
+        vertex.label.cex = igraph::V(g)$label.cex,
+        # vertex.label = NA,  igraph::V(g)$name,
+        vertex.color = igraph::V(g)$color,
+        vertex.frame.color = framecolor, vertex.shape = "circle",
+        vertex.size = 0.4,
+        vertex.label.dist = .1, vertex.label.degree = pi/2,
+        vertex.label.color = "black",
+        edge.arrow.size = .4, edge.arrow.width = 1, asp = 0, edge.curved = F,
+        edge.color = igraph::E(g)$color)
+    # text(x = 1.05, y = 0, labels = title,
+    #      srt = 270, font = 2, cex = 5)
+    # legend(x = "topleft", c("Addition", "Subtraction"), lty = 1, lwd = 2, col
+    # = c(brewer.pal(n = 3, name = "Set2")[1], brewer.pal(n = 3, name =
+    # "Set2")[2]), cex = 5)
+    dev.off()
+}
+
+plot_graph_local(g2, "/tmp/tc.png",
+                 "2017 Calculation Link Taxonomy: Test")
