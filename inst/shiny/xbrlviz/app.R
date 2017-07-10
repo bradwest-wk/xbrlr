@@ -7,7 +7,7 @@ library(DT)
 # 1. Reset double click on switching input$link
 # 2. legend in plot
 
-source("./side_bar.R")
+# source("./side_bar.R")
 source("./pretty_tree_graph.R")
 source("./layout_rescale.R")
 
@@ -19,47 +19,54 @@ load("./data/calc_link_dirty.Rdata")
 load("./data/present_link_dirty.Rdata")
 
 # Define UI for application that draws a histogram
-ui <- fluidPage(
-    verticalLayout(
-        titlePanel("XBRL Viewer: 2017 Taxonomy"),
-        wellPanel(
-            fluidRow(
-                column(1, radioButtons(inputId = "link",
-                                       label = "Linkbase",
-                                       choices = c(
-                                           "Calculation",
-                                           "Presentation"
-                                       ),
-                                       selected = "Calculation")
-                ),
-                column(7, uiOutput("selectBar")
-                ),
-                column(1, radioButtons(
-                    inputId = "names", label = "Show Element Names?",
-                    choices = c("Yes" = TRUE, "No" = FALSE),
-                    selected = FALSE)
-                ),
-                column(3,
-                       # h5("Notes", align = "center"),
-                       htmlOutput("instructions"))
-            )
-        ),
+ui <- navbarPage("XBRL Taxonomy Viewer",
+                 tabPanel("2017 Taxonomy",
+        fluidPage(
+        verticalLayout(
+            titlePanel("XBRL Viewer: 2017 Taxonomy"),
+            wellPanel(
+                fluidRow(
+                    column(1, radioButtons(inputId = "link",
+                                           label = "Linkbase",
+                                           choices = c(
+                                               "Calculation",
+                                               "Presentation"
+                                           ),
+                                           selected = "Calculation")
+                    ),
+                    column(7, uiOutput("selectBar")
+                    ),
+                    column(1, radioButtons(
+                        inputId = "names", label = "Show Element Names?",
+                        choices = c("Yes" = TRUE, "No" = FALSE),
+                        selected = FALSE)
+                    ),
+                    column(3,
+                           # h5("Notes", align = "center"),
+                           htmlOutput("instructions"))
+                )
+            ),
 
-        plotOutput("tree", width="100%", height = "900px",
-                   click = "plot_click",
-                   brush = brushOpts(id = "plot_brush", resetOnNew = TRUE),
-                   dblclick = "plot_dblclick"
-        ),
+            plotOutput("tree", width="100%", height = "900px",
+                       click = "plot_click",
+                       brush = brushOpts(id = "plot_brush", resetOnNew = TRUE),
+                       dblclick = "plot_dblclick"
+            ),
 
-        # br(),
-        # br(),
-        # h3("Clicked Element"),
-        # DT::dataTableOutput("plot_clicked_points"),
-        # br(),
-        h3("Selected Elements", align = "center"),
-        DT::dataTableOutput("plot_brushed_points"),
-        htmlOutput("credit")
+            # br(),
+            # br(),
+            # h3("Clicked Element"),
+            # DT::dataTableOutput("plot_clicked_points"),
+            # br(),
+            h3("Selected Elements", align = "center"),
+            DT::dataTableOutput("plot_brushed_points"),
+            htmlOutput("credit")
+        )
     )
+                 ),
+
+    tabPanel("Visualize Custom Taxonomy",
+             source("./upload_taxonomy_ui.R", local = TRUE))
 )
 
 
@@ -80,6 +87,16 @@ server <- function(input, output, session) {
                "Calculation" = calc_link_dirty,
                "Presentation" = present_link_dirty)
     })
+
+    # output$fname <-
+    #     renderPrint(
+    #         print(input$inout_f)
+    #     )
+    #
+    # output$df <-
+    #     renderPrint(
+    #         head(datasetInput)
+    #     )
 
     output$selectBar <- renderUI({
         req(input$link)
@@ -153,6 +170,8 @@ server <- function(input, output, session) {
             ranges$y <- c(-1,1)
         }
     })
+
+    source("./upload_taxonomy_server.R", local = TRUE)
 
     # output$credit <- renderText("Work in progress.  Contact brad dot west at
     #                             workiva dot com with questions or feature
