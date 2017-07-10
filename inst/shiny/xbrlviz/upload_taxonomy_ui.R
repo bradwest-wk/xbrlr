@@ -2,7 +2,7 @@
 
 fluidPage(
     verticalLayout(
-        titlePanel("Upload and Visualize Custom Taxonomy"),
+        titlePanel("Upload and Visualize Taxonomy"),
         wellPanel(
             fluidRow(
                 column(1, radioButtons(inputId = "link2",
@@ -13,7 +13,7 @@ fluidPage(
                                        ),
                                        selected = "Calculation")
                        ),
-                column(6, fileInput('input_file',
+                column(3, fileInput('input_file',
                                     label = "Taxonomy upload (csv or excel)",
                                     width = '100%')
                        ),
@@ -22,7 +22,9 @@ fluidPage(
                     choices = c("Yes" = TRUE, "No" = FALSE),
                     selected = FALSE)
                 ),
-                column(4,verbatimTextOutput("instructions2"))
+                column(5,verbatimTextOutput("instructions2")
+                ),
+                column(2, actionButton("write_image", "Save Graph Image"))
             )
         ),
         # verbatimTextOutput("instructions2"),
