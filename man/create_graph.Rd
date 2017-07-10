@@ -8,7 +8,7 @@ create_graph(statement_of_interest = statement, root_nodes = NA)
 }
 \arguments{
 \item{statement_of_interest}{A dataframe of the statement of interest, often
-generated from a cal to find_statement. Must have the column names parent
+generated from a call to find_statement. Must have the column names parent
 and child.}
 
 \item{root_nodes}{A character vector of element names to place at the highest

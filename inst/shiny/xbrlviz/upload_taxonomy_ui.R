@@ -2,7 +2,7 @@
 
 fluidPage(
     verticalLayout(
-        titlePanel("Upload and Visualize Taxonomy"),
+        titlePanel("Upload and Visualize Taxonomy (Beta)"),
         wellPanel(
             fluidRow(
                 column(1, radioButtons(inputId = "link2",
@@ -22,9 +22,9 @@ fluidPage(
                     choices = c("Yes" = TRUE, "No" = FALSE),
                     selected = FALSE)
                 ),
-                column(5,verbatimTextOutput("instructions2")
+                column(6,verbatimTextOutput("instructions2")
                 ),
-                column(2, actionButton("write_image", "Save Graph Image"))
+                column(1, downloadButton("downloadData", "Download Graph Image"))
             )
         ),
         # verbatimTextOutput("instructions2"),

@@ -66,7 +66,9 @@ ui <- navbarPage("XBRL Taxonomy Viewer",
                  ),
 
     tabPanel("Visualize Custom Taxonomy",
-             source("./upload_taxonomy_ui.R", local = TRUE))
+             source("./upload_taxonomy_ui.R", local = TRUE)),
+
+    selected = "Visualize Custom Taxonomy"
 )
 
 

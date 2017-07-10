@@ -1,7 +1,8 @@
 # creates server side for app tab: upload and visualize custom taxonomy
 
 output$instructions2 <-
-    renderText("Upload an excel file in the below format. Contact brad dot west at workiva dot com with bug reports or questions.
+    renderText("Upload an excel file in the below format.
+Contact brad dot west at workiva dot com with bug reports or questions.
  ________________________________________________
 | PARENT      | CHILD     | REFERENCE   | WEIGHT |
 | ----------- | --------- | ----------- | ------ |
@@ -93,5 +94,25 @@ observeEvent(input$plot_dblclick2, {
         ranges2$y <- c(-1,1)
     }
 })
+
+# image download content
+image_content <- function(file) {
+    g <- basic_graph(uploadInput())
+    xbrlr::plot_graph(g, file, title = input$input_file$name)
+}
+
+output$downloadData <- downloadHandler(
+    filename = function() {
+        req(input$input_file)
+        paste0(input$input_file$name, format(Sys.time(), "%Y_%m_%d"), ".png")
+    },
+    content = function(file) {
+        req(input$input_file)
+        g <- basic_graph(uploadInput())
+        xbrlr::plot_graph(g, file, title = input$input_file$name)
+    },
+    contentType = "image/png"
+)
+
 
 

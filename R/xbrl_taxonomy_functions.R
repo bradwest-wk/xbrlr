@@ -179,14 +179,14 @@ plot_graph <- function(g, filename, title){
     roots <- which(igraph::degree(g, v = igraph::V(g), mode = "in")==0)
     png(filename = filename, width = 5760, height = 5760, res = 100)
     par(cex = 1, cex.main = 5, cex.sub = 4, srt = 270, mar = c(20,4,10,4),
-        font.lab = 2)
+        font.lab = 2, adj = 0)
     igraph::plot.igraph(g, layout = igraph::layout_as_tree(
         g, root = roots, rootlevel = c(rep(1, length(roots)))),
         vertex.label.cex = igraph::V(g)$label.cex, vertex.label
         = igraph::V(g)$name, vertex.color = igraph::V(g)$color,
         vertex.frame.color = framecolor, vertex.shape = "circle",
-        vertex.size = 1,
-        vertex.label.dist = .1, vertex.label.degree = pi/2,
+        vertex.size = 1, vertex.label.dist = .02,
+        vertex.label.degree = pi/2,
         vertex.label.color = "black",
          edge.arrow.size = .4, edge.arrow.width = 1, asp = 0, edge.curved = F,
          edge.color = igraph::E(g)$color)
