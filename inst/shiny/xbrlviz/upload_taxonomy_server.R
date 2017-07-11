@@ -1,7 +1,7 @@
 # creates server side for app tab: upload and visualize custom taxonomy
 
 output$instructions2 <-
-    renderText("Upload an excel file in the below format.
+    renderText("Upload an Excel file in the below format.
 Contact brad dot west at workiva dot com with bug reports or questions.
  _____________________________________________
 | PARENT   | CHILD   | COLUMN_3 | ...COLUMN_X |
