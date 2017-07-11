@@ -3,15 +3,15 @@
 output$instructions2 <-
     renderText("Upload an excel file in the below format.
 Contact brad dot west at workiva dot com with bug reports or questions.
- ________________________________________________
-| PARENT      | CHILD     | REFERENCE   | WEIGHT |
-| ----------- | --------- | ----------- | ------ |
-| parent_1    | child_1   | S-X Rule ** | 1      |
-|             | child_2   | ...         | ...    |
-| parent_2    | child_1   | ...         | ...    |
-|             | child_2   | ...         | ...    |
-|             | child_3   | ...         | ...    |
-| ...         | ...       | ...         | ...    |"
+ _____________________________________________
+| PARENT   | CHILD   | COLUMN_3 | ...COLUMN_X |
+| -------- | ------- | -------- | ----------- |
+| parent_1 | child_1 | ...      | ...         |
+|          | child_2 | ...      | ...         |
+| parent_2 | child_1 | ...      | ...         |
+|          | child_2 | ...      | ...         |
+|          | child_3 | ...      | ...         |
+| ...      | ...     | ...      | ...         |"
                )
 
 uploadInput <- reactive({
@@ -22,14 +22,8 @@ uploadInput <- reactive({
                 paste(inFile$datapath, ".xlsx", sep=""))
      raw <- readxl::read_excel(paste(inFile$datapath, ".xlsx", sep=""),
                                sheet = 1, col_names = TRUE)
-     if (input$link2 == "Calculation") {
-         data <- raw[,c(1,2,4)]
-         colnames(data) <- c("parent", "child", "weight")
-     } else {
-         data <- raw[,c(1,2)]
-         colnames(data) <- c("parent", "child")
-     }
-
+     data <- raw[,c(1,2)]
+     colnames(data) <- c("parent", "child")
      data <- tidyr::fill(data, parent)
      if ( sum(duplicated(data)) > 0 ) {
          warning("Duplicated edges in dataframe--investigate further.")
@@ -44,18 +38,23 @@ basic_graph <- function(edgelist){
     g <- igraph::graph_from_edgelist(as.matrix(
         edgelist[,c("parent", "child")]), directed = T)
     colors <- RColorBrewer::brewer.pal(n = 3, name = "Set2")
-    if("weight" %in% colnames(edgelist)){
-        igraph::V(g)$weight <- dplyr::left_join(
-            as.data.frame(igraph::V(g)$name, stringsAsFactors = FALSE),
-            edgelist[,c("child", "weight")],
-            by = c("igraph::V(g)$name"="child"))$weight
-    }
+    roots <- which(igraph::degree(g, v = igraph::V(g), mode = "in")==0)
+    # if("weight" %in% colnames(edgelist)){
+    #     igraph::V(g)$weight <- dplyr::left_join(
+    #         as.data.frame(igraph::V(g)$name, stringsAsFactors = FALSE),
+    #         edgelist[,c("child", "weight")],
+    #         by = c("igraph::V(g)$name"="child"))$weight
+    # }
+
     # set Vertex and Edge color attributes
-    darkgrey <- col2rgb("darkgrey")
     igraph::E(g)$color <- colors[1]
     igraph::V(g)$color <- colors[3]
-    igraph::E(g)[which(igraph::tail_of(
-        g, igraph::E(g))$weight == -1)]$color <- colors[2]
+    igraph::V(g)$label.cex <- 1.25
+    igraph::V(g)$label.cex[roots] <- 5
+    igraph::V(g)$size <- 1.25
+    igraph::V(g)$size[roots] <- 3
+    # igraph::E(g)[which(igraph::tail_of(
+    #     g, igraph::E(g))$weight == -1)]$color <- colors[2]
     return(g)
 }
 
@@ -104,7 +103,8 @@ image_content <- function(file) {
 output$downloadData <- downloadHandler(
     filename = function() {
         req(input$input_file)
-        paste0(input$input_file$name, format(Sys.time(), "%Y_%m_%d"), ".png")
+        paste0(strsplit(input$input_file$name, "[.]")[[1]][1], "_",
+               format(Sys.time(), "%Y-%m-%d-%H%M%S"), ".png")
     },
     content = function(file) {
         req(input$input_file)

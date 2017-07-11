@@ -22,9 +22,9 @@ fluidPage(
                     choices = c("Yes" = TRUE, "No" = FALSE),
                     selected = FALSE)
                 ),
-                column(6,verbatimTextOutput("instructions2")
+                column(5,verbatimTextOutput("instructions2")
                 ),
-                column(1, downloadButton("downloadData", "Download Graph Image"))
+                column(2, downloadButton("downloadData", "Download Graph Image"))
             )
         ),
         # verbatimTextOutput("instructions2"),

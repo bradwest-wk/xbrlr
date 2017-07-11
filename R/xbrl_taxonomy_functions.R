@@ -155,6 +155,8 @@ create_graph <- function(statement_of_interest = statement, root_nodes = NA){
 
     igraph::V(g)$label.cex <- 1.25
     igraph::V(g)$label.cex[roots] <- 2
+    igraph::V(g)$size <- 1.25
+    igraph::V(g)$size[roots] <- 2
     if (!is.na(root_nodes) && (root_nodes %in% igraph::V(g)$name)){
         igraph::V(g)$label.cex[root_nodes] <- 2.5
     }
@@ -182,10 +184,11 @@ plot_graph <- function(g, filename, title){
         font.lab = 2, adj = 0)
     igraph::plot.igraph(g, layout = igraph::layout_as_tree(
         g, root = roots, rootlevel = c(rep(1, length(roots)))),
-        vertex.label.cex = igraph::V(g)$label.cex, vertex.label
-        = igraph::V(g)$name, vertex.color = igraph::V(g)$color,
+        # vertex.label.cex = 1.25,
+        vertex.label = igraph::V(g)$name, vertex.color = igraph::V(g)$color,
         vertex.frame.color = framecolor, vertex.shape = "circle",
-        vertex.size = 1, vertex.label.dist = .02,
+        # vertex.size = 1.25,
+        vertex.label.dist = .02,
         vertex.label.degree = pi/2,
         vertex.label.color = "black",
          edge.arrow.size = .4, edge.arrow.width = 1, asp = 0, edge.curved = F,
