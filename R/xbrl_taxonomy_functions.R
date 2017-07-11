@@ -130,28 +130,14 @@ create_graph <- function(statement_of_interest = statement, root_nodes = NA){
     roots <- which(igraph::degree(g, v = igraph::V(g), mode = "in")==0)
     # Add weight and depth attribute to graph
     if("weight" %in% colnames(statement_of_interest)){
-        igraph::V(g)$weight <- dplyr::left_join(
-            as.data.frame(igraph::V(g)$name, stringsAsFactors = FALSE),
-            statement_of_interest[,c("child", "weight")],
-            by = c("igraph::V(g)$name"="child"))$weight
+        igraph::E(g)$weight <- na.omit(statement_of_interest$weight)
     }
-
-    igraph::V(g)$depth <- dplyr::left_join(
-        as.data.frame(igraph::V(g)$name, stringsAsFactors = FALSE),
-        statement_of_interest[,c("child", "depth")],
-        by = c("igraph::V(g)$name"="child"))$depth
-    igraph::V(g)$label <- dplyr::left_join(
-        as.data.frame(igraph::V(g)$name, stringsAsFactors = FALSE),
-        statement_of_interest[,c("child", "label")],
-        by = c("igraph::V(g)$name"="child"))$label
-
 
     igraph::E(g)$color <- colors[1]
     igraph::V(g)$color <- colors[3]
 
-    # Edge color goes to green if the relationship is a subtraction
-    igraph::E(g)[which(igraph::tail_of(
-        g, igraph::E(g))$weight == -1)]$color <- colors[2]
+    # Edge color goes to orange if the relationship is a subtraction
+    igraph::E(g)[which(igraph::E(g)$weight == -1)]$color <- colors[2]
 
     igraph::V(g)$label.cex <- 1.25
     igraph::V(g)$label.cex[roots] <- 2
