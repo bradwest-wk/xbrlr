@@ -5,6 +5,7 @@ library(tidyverse)
 library(igraph)
 library(stringr)
 library(RColorBrewer)
+library(visNetwork)
 
 # =============================================================================
 # Set-up: Load data
@@ -33,6 +34,30 @@ taxonomy_load <- function(taxonomy, link = "Calculation", sheet_type = "both") {
         out_df <- bind_rows(out_df, stmt_of_interest)
     }
     return(out_df)
+}
+
+
+#' Get Dirty Statements or Disclosures
+#'
+#' @param taxonomy The dirty taxonomy of interest
+#' @param type One of c("Statement", "Disclosure", "both") specifying which
+#' sheet is of interest.  If both function returns without performing
+#' operations
+#' @return a dirty taxonomy with just the sheets of interest
+get_desired_sheets <- function(taxonomy, type) {
+    if (type == "both") {
+        return(taxonomy)
+    } else if (type == "Statement") {
+        delete <- "Disclosure"
+    } else {
+        delete = "Statement"
+    }
+    nums <- c(which(taxonomy$prefix == "Definition"), nrow(taxonomy)+2)
+    for (i in (length(nums)-1):1) {
+        if (substr(taxonomy$name[nums[i]], 10, 9+nchar(delete))==delete)
+            taxonomy <- taxonomy[-((nums[i]-1):(nums[i+1]-2)),]
+    }
+    return(taxonomy)
 }
 
 # =============================================================================
@@ -80,7 +105,7 @@ statement_column <- function(dirty_tax) {
 #' @return A graph with an updated color and group attribute based on number of
 #' groups
 group_count <- function(g) {
-    colors <- brewer.pal(11, "Spectral")
+    colors <- brewer.pal(11, "RdBu")
     for (i in 1:gorder(g)) {
         V(g)[i]$group_count <- length(str_split(V(g)[i]$group, ",")[[1]])
         if (V(g)[i]$group_count == 1) {
@@ -131,9 +156,10 @@ plot_graph_local <- function(g, filename, title) {
 # Run it
 load("./data/calc_link_dirty.Rdata")
 calc_link_dirty <- calc_link_dirty[!is.na(calc_link_dirty$prefix), ]
-statements_2017 <- taxonomy_load(calc_link_dirty, "Calculation", "Statement")
+statements_dirty <- get_desired_sheets(calc_link_dirty, "Statement")
+statements_2017 <- taxonomy_load(statements_dirty, "Calculation", "Statement")
 g <- create_graph(statements_2017)
-g <- add_groups(g, calc_link_dirty)
+g <- add_groups(g, statements_dirty)
 g <- group_count(g)
 
 # plot some temp graphs

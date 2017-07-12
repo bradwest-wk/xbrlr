@@ -5,6 +5,81 @@ library(xbrlr)
 library(tidyverse)
 library(RColorBrewer)
 library(igraph)
+library(stringr)
+
+# =============================================================================
+# load whole taxonomy graph from dtA_whole_tx.R, then get a subset of that
+# graph
+set.seed(244)
+# smaller graph for easy render
+g2 <- delete_vertices(g, floor(runif(n=3000, min = 1, max = gorder(g))))
+g2 <- g
+
+# create a nodes dataframe
+nodes <- data.frame(
+    id = 1:gorder(g2), title = V(g2)$name, group = V(g2)$group,
+    color = V(g2)$color, shape = rep("circle", gorder(g2)), physics = FALSE,
+    stringsAsFactors = FALSE)
+
+#' Create Edge ID matrix
+#'
+#' @param g igraph object
+#' @param nodes visNodes dataframe
+#' @return the edge dataframe with id's corresponding to the nodes df
+get_edge_df <- function(g, nodes) {
+    named_edges <- as.data.frame(get.edgelist(g), stringsAsFactors = FALSE)
+    from <- c()
+    to <- c()
+    color <- c()
+    value <- c()
+    for (i in 1:nrow(named_edges)) {
+        from <- c(from, nodes$id[which(nodes$title==named_edges$V1[i])])
+        to <- c(to, nodes$id[which(nodes$title==named_edges$V2[i])])
+        color <- c(color, E(g)[i]$color)
+        value <- c(value, E(g)[i]$weight)
+    }
+    edges <- cbind.data.frame(from, to, color, value)
+    return(edges)
+}
+
+#' Get Unique Groups from Nodes Matrix
+#'
+#' Grabs the unique groups from a vector of groups, some elements of which
+#' have more than one group in them
+#' @param groups a vector of groups
+#' @return a vector of the unique groups in the vector
+unique_groups <- function(groups) {
+    all <- c()
+    for (el in groups) {
+        all <- c(all, str_split(el, ", ")[[1]])
+    }
+    unique(all)
+}
+
+
+edges <- get_edge_df(g2, nodes)
+edges$physics <- rep(FALSE, nrow(edges))
+
+# build igraph layouts for passing to visNetwork
+roots <- which(igraph::degree(g, v = igraph::V(g), mode = "in")==0)
+l_rt <- layout_as_tree(g2, root = numeric(), circular = TRUE)
+l_drl <- layout_with_drl(g2, weights = NULL, options = drl_defaults$final)
+l_mds <- layout_with_mds(g2)
+
+# get unique groups
+the_groups <- unique_groups(nodes$group)
+
+# build graph
+visNetwork(nodes, edges, main = "Test") %>%
+    visEdges(width = 0.5, arrow = "to", arrowStrikethrough = FALSE) %>%
+    visOptions(selectedBy = list(variable = "group", multiple = TRUE)) %>%
+    visIgraphLayout(layout = "layout.norm", randomSeed = 222,
+                    smooth = TRUE, layoutMatrix = l_rt) %>%
+    visGroups(groupname = the_groups[8], shape = "triangle") %>%
+    visGroups(groupname = the_groups[6], shape = "square") %>%
+    visGroups(groupname = the_groups[11], shape = "diamond")
+
+
 
 # =============================================================================
 # visNetwork needs at least two pieces of information:
