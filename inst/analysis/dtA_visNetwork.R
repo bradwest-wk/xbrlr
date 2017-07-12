@@ -12,14 +12,43 @@ library(stringr)
 # graph
 set.seed(244)
 # smaller graph for easy render
-g2 <- delete_vertices(g, floor(runif(n=3000, min = 1, max = gorder(g))))
+g2 <- delete_vertices(g, floor(runif(n=5000, min = 1, max = gorder(g))))
 g2 <- g
+
+# order nodes
+#' Find Permutation Order
+#'
+#' Find a permutation order for re-ordering the nodes of an igraph object
+#' alphabetically (based on their name)
+#' @param g An igraph object
+#' @return a numeric vector, the permutation, to be passed to permute igraph
+#' function in which the first element is the new id of vertex 1, etc.
+find_order <- function(g) {
+    order <- order(V(g)$name)
+    result <- numeric()
+    for (i in 1:gorder(g)) {
+        result <- c(result, which(order==i))
+    }
+    result
+}
+
+g2 <- permute(g2, find_order(g2))
 
 # create a nodes dataframe
 nodes <- data.frame(
-    id = 1:gorder(g2), title = V(g2)$name, group = V(g2)$group,
-    color = V(g2)$color, shape = rep("circle", gorder(g2)), physics = FALSE,
+    id = 1:gorder(g2),
+    label = V(g2)$name,
+    title = V(g2)$name,
+    group = V(g2)$group,
+    color = V(g2)$color,
+    # shape = rep("circle", gorder(g2)),
+    physics = rep(FALSE, gorder(g2)),
+    value = V(g2)$group_count,
+    size = ifelse(V(g2)$group_count==1, 15,
+                  ifelse(V(g2)$group_count==2, 20,
+                         ifelse(V(g2)$group_count==3, 25, 30))),
     stringsAsFactors = FALSE)
+
 
 #' Create Edge ID matrix
 #'
@@ -31,14 +60,16 @@ get_edge_df <- function(g, nodes) {
     from <- c()
     to <- c()
     color <- c()
-    value <- c()
+    width <- rep(-1, nrow(named_edges))
+    physics <- rep(FALSE, nrow(named_edges))
+    dashes <- ifelse(V(g)$weight==1, FALSE, TRUE)
+    selectionWidth <- rep(0.5, nrow(named_edges))
     for (i in 1:nrow(named_edges)) {
         from <- c(from, nodes$id[which(nodes$title==named_edges$V1[i])])
         to <- c(to, nodes$id[which(nodes$title==named_edges$V2[i])])
         color <- c(color, E(g)[i]$color)
-        value <- c(value, E(g)[i]$weight)
     }
-    edges <- cbind.data.frame(from, to, color, value)
+    edges <- cbind.data.frame(from, to, color, width, physics)
     return(edges)
 }
 
@@ -58,7 +89,7 @@ unique_groups <- function(groups) {
 
 
 edges <- get_edge_df(g2, nodes)
-edges$physics <- rep(FALSE, nrow(edges))
+
 
 # build igraph layouts for passing to visNetwork
 roots <- which(igraph::degree(g, v = igraph::V(g), mode = "in")==0)
@@ -71,13 +102,17 @@ the_groups <- unique_groups(nodes$group)
 
 # build graph
 visNetwork(nodes, edges, main = "Test") %>%
-    visEdges(width = 0.5, arrow = "to", arrowStrikethrough = FALSE) %>%
-    visOptions(selectedBy = list(variable = "group", multiple = TRUE)) %>%
+    visEdges(width = 0.1, arrow = "to", arrowStrikethrough = FALSE) %>%
+    visNodes(label = NULL, font = list(size = 0)) %>%
+    visOptions(selectedBy = list(variable = "group", multiple = TRUE),
+               highlightNearest = list(enabled = T, degree = 2, hover = T),
+               nodesIdSelection = list(enabled = T, useLabels = T)) %>%
     visIgraphLayout(layout = "layout.norm", randomSeed = 222,
                     smooth = TRUE, layoutMatrix = l_rt) %>%
     visGroups(groupname = the_groups[8], shape = "triangle") %>%
     visGroups(groupname = the_groups[6], shape = "square") %>%
-    visGroups(groupname = the_groups[11], shape = "diamond")
+    visGroups(groupname = the_groups[11], shape = "diamond") %>%
+    visInteraction(multiselect = TRUE)
 
 
 
