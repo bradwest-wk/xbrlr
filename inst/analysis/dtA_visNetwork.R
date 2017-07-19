@@ -1,4 +1,4 @@
-# Experiment with visNetwork
+<- # Experiment with visNetwork
 
 library(visNetwork)
 library(xbrlr)
@@ -7,6 +7,8 @@ library(RColorBrewer)
 library(igraph)
 library(stringr)
 
+
+source("./inst/shiny/xbrlviz/whole_tx.R")
 # =============================================================================
 # load whole taxonomy graph from dtA_whole_tx.R, then get a subset of that
 # graph
@@ -14,23 +16,6 @@ set.seed(244)
 # smaller graph for easy render
 g2 <- delete_vertices(g, floor(runif(n=5000, min = 1, max = gorder(g))))
 g2 <- g
-
-# order nodes
-#' Find Permutation Order
-#'
-#' Find a permutation order for re-ordering the nodes of an igraph object
-#' alphabetically (based on their name)
-#' @param g An igraph object
-#' @return a numeric vector, the permutation, to be passed to permute igraph
-#' function in which the first element is the new id of vertex 1, etc.
-find_order <- function(g) {
-    order <- order(V(g)$name)
-    result <- numeric()
-    for (i in 1:gorder(g)) {
-        result <- c(result, which(order==i))
-    }
-    result
-}
 
 g2 <- permute(g2, find_order(g2))
 
@@ -49,51 +34,13 @@ nodes <- data.frame(
                          ifelse(V(g2)$group_count==3, 25, 30))),
     stringsAsFactors = FALSE)
 
-
-#' Create Edge ID matrix
-#'
-#' @param g igraph object
-#' @param nodes visNodes dataframe
-#' @return the edge dataframe with id's corresponding to the nodes df
-get_edge_df <- function(g, nodes) {
-    named_edges <- as.data.frame(get.edgelist(g), stringsAsFactors = FALSE)
-    from <- c()
-    to <- c()
-    color <- c()
-    width <- rep(-1, nrow(named_edges))
-    physics <- rep(FALSE, nrow(named_edges))
-    dashes <- ifelse(V(g)$weight==1, FALSE, TRUE)
-    selectionWidth <- rep(0.5, nrow(named_edges))
-    for (i in 1:nrow(named_edges)) {
-        from <- c(from, nodes$id[which(nodes$title==named_edges$V1[i])])
-        to <- c(to, nodes$id[which(nodes$title==named_edges$V2[i])])
-        color <- c(color, E(g)[i]$color)
-    }
-    edges <- cbind.data.frame(from, to, color, width, physics)
-    return(edges)
-}
-
-#' Get Unique Groups from Nodes Matrix
-#'
-#' Grabs the unique groups from a vector of groups, some elements of which
-#' have more than one group in them
-#' @param groups a vector of groups
-#' @return a vector of the unique groups in the vector
-unique_groups <- function(groups) {
-    all <- c()
-    for (el in groups) {
-        all <- c(all, str_split(el, ", ")[[1]])
-    }
-    unique(all)
-}
-
-
+# build edges
 edges <- get_edge_df(g2, nodes)
 
 
 # build igraph layouts for passing to visNetwork
-roots <- which(igraph::degree(g, v = igraph::V(g), mode = "in")==0)
-l_rt <- layout_as_tree(g2, root = numeric(), circular = TRUE)
+roots <- which(igraph::degree(g2, v = igraph::V(g2), mode = "in")==0)
+l_rt <- layout_as_tree(g2, root = roots, circular = TRUE)
 l_drl <- layout_with_drl(g2, weights = NULL, options = drl_defaults$final)
 l_mds <- layout_with_mds(g2)
 
@@ -106,7 +53,7 @@ visNetwork(nodes, edges, main = "Test") %>%
     visNodes(label = NULL, font = list(size = 0)) %>%
     visOptions(selectedBy = list(variable = "group", multiple = TRUE),
                highlightNearest = list(enabled = T, degree = 2, hover = T),
-               nodesIdSelection = list(enabled = T, useLabels = T)) %>%
+               nodesIdSelection = list(enabled = T, useLabels = F)) %>%
     visIgraphLayout(layout = "layout.norm", randomSeed = 222,
                     smooth = TRUE, layoutMatrix = l_rt) %>%
     visGroups(groupname = the_groups[8], shape = "triangle") %>%
