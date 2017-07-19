@@ -20,6 +20,7 @@ Imports:
     readxl,
     shiny,
     stringr,
-    tidyr
+    tidyr,
+    visNetwork
 Depends: R (>= 3.3.3)
 RoxygenNote: 6.0.1
