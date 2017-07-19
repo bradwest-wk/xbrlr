@@ -1,6 +1,7 @@
 # creates ui for app tab: upload and visualize custom taxonomy
 
 fluidPage(
+    useShinyjs(),
     verticalLayout(
         titlePanel("Upload and Visualize Taxonomy (Beta)"),
         wellPanel(
@@ -14,8 +15,9 @@ fluidPage(
                                        selected = "Calculation")
                        ),
                 column(3, fileInput('input_file',
-                                    label = "Taxonomy upload (csv or excel)",
-                                    width = '100%')
+                                    label = "Taxonomy upload (Excel)",
+                                    width = '100%'),
+                       actionButton("reset_input", "Reset Input File")
                        ),
                 column(1, radioButtons(
                     inputId = "names2", label = "Show Element Names?",
@@ -24,7 +26,9 @@ fluidPage(
                 ),
                 column(5,verbatimTextOutput("instructions2")
                 ),
-                column(2, downloadButton("downloadData", "Download Graph Image"))
+                column(2, downloadButton(
+                    "downloadData", "Download Graph Image")
+                    )
             )
         ),
         # verbatimTextOutput("instructions2"),

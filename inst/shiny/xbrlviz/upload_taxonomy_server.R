@@ -14,14 +14,16 @@ Contact brad dot west at workiva dot com with bug reports or questions.
 | ...      | ...     | ...      | ...         |"
                )
 
+rv <- reactiveValues(data = NULL)
+
 uploadInput <- reactive({
     req(input$input_file, input$link2)
     inFile <- input$input_file
     # need to rename the file so that read_excel works
     file.rename(inFile$datapath,
                 paste(inFile$datapath, ".xlsx", sep=""))
-     raw <- readxl::read_excel(paste(inFile$datapath, ".xlsx", sep=""),
-                               sheet = 1, col_names = TRUE)
+    raw <- readxl::read_excel(paste(inFile$datapath, ".xlsx", sep=""),
+                              sheet = 1, col_names = TRUE)
      data <- raw[,c(1,2)]
      colnames(data) <- c("parent", "child")
      data <- tidyr::fill(data, parent)
@@ -29,6 +31,11 @@ uploadInput <- reactive({
          warning("Duplicated edges in dataframe--investigate further.")
      }
      data
+})
+
+observe({
+    req(input$input_file)
+    rv$data <- uploadInput()
 })
 
 ranges2 <- reactiveValues(x = c(-1,1), y = c(-1,1))
@@ -69,10 +76,10 @@ basic_graph <- function(edgelist){
 #     )
 
 output$uploadTree <- renderPlot({
-    req(input$input_file)
+    req(input$input_file, rv$data)
     zoom_level <- 2 / (ranges2$x[2] - ranges2$x[1])
     # need to call reactive uploadInput function below
-    g <- basic_graph(uploadInput())
+    g <- basic_graph(rv$data)
     par(srt = 290, adj = 0)
     xbrlr:::plot_single_graph(g, title = input$input_file$name, title_size = 2,
                               display_names = input$names2,
@@ -113,6 +120,11 @@ output$downloadData <- downloadHandler(
     },
     contentType = "image/png"
 )
+
+observeEvent(input$reset_input, {
+    reset('input_file')
+    rv$data <- NULL
+})
 
 
 

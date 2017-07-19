@@ -3,6 +3,7 @@ library(xbrlr)
 library(scales)
 library(DT)
 library(visNetwork)
+library(shinyjs)
 
 # To Do:
 # 1. Reset double click on switching input$link
