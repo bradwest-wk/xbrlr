@@ -2,6 +2,7 @@ library(shiny)
 library(xbrlr)
 library(scales)
 library(DT)
+library(visNetwork)
 
 # To Do:
 # 1. Reset double click on switching input$link
@@ -67,6 +68,9 @@ ui <- navbarPage("XBRL Taxonomy Viewer",
 
     tabPanel("Visualize Custom Taxonomy",
              source("./upload_taxonomy_ui.R", local = TRUE)),
+
+    tabPanel("Whole Taxonomy",
+             source("./whole_tx_ui.R", local = TRUE)),
 
     selected = "Visualize Custom Taxonomy"
 )
@@ -174,6 +178,8 @@ server <- function(input, output, session) {
     })
 
     source("./upload_taxonomy_server.R", local = TRUE)
+
+    source("./whole_tx_server.R", local = TRUE)
 
     # output$credit <- renderText("Work in progress.  Contact brad dot west at
     #                             workiva dot com with questions or feature
