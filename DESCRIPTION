@@ -19,6 +19,7 @@ Imports:
     readr,
     readxl,
     shiny,
+    shinyjs,
     stringr,
     tidyr,
     visNetwork
