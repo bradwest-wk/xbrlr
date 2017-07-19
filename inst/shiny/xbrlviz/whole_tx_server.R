@@ -10,19 +10,17 @@ source("./whole_tx.R")
 
 output$whole_tx_instructions <-
     renderText("This tab attempts to visualize the 2017 US GAAP taxonomy.
-               At this time, only the calculation link is valid and we have
-               excluded Disclosures.  Note that the layout algorithm
-               dramatically changes the visualization of the data.
-               We must stress that the data remain the same regardless
-               of the algorithm chosen. Clicking on a node will highlight
-                it and its nearest neighbors. Use the dropdowns to select
-            individual nodes or nodes by statement.  The user can drag nodes,
-            and can zoom with mouse scrolling. Nodes are currently size scaled
-based on how many statements they appear in.  Node shapes are tied to certain
-statements, but this has not been expanded to all statements.
-Finally, this app attempts to visualize over 4000 nodes. Be patient, but if
-something seems broken, don't hesitate to contact brad dot west at workiva
-               dot com.")
+At this time, only the calculation link is valid and we have excluded
+Disclosures.  Note that the layout algorithm dramatically changes the
+visualization of the data. We must stress that the data remain the same
+regardless of the algorithm chosen. Clicking on a node will highlight it and
+its nearest neighbors. Use the dropdowns to select individual nodes or nodes by
+statement.  The user can drag nodes, and can zoom with mouse scrolling. Nodes
+are currently size scaled based on how many statements they appear in.  Node
+shapes are tied to certain statements, but this has not been expanded to all
+statements. Finally, this app attempts to visualize over 4000 nodes. Be patient,
+but if something seems broken, don't hesitate to contact brad dot west at
+workiva dot com.")
 
 layoutInput <- reactive({
     req(input$link2, input$layout_algo)
