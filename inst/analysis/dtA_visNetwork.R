@@ -9,6 +9,13 @@ library(stringr)
 
 
 source("./inst/shiny/xbrlviz/whole_tx.R")
+
+load("./inst/shiny/xbrlviz/data/edges_2017_stmts_only_calc.Rdata")
+load("./inst/shiny/xbrlviz/data/nodes_2017_stmts_only_calc.Rdata")
+load("./inst/shiny/xbrlviz/data/l_rt_2017_stmts_only_calc.Rdata")
+load("./inst/shiny/xbrlviz/data/l_drl_2017_stmts_only_calc.Rdata")
+load("./inst/shiny/xbrlviz/data/l_mds_2017_stmts_only_calc.Rdata")
+
 # =============================================================================
 # load whole taxonomy graph from dtA_whole_tx.R, then get a subset of that
 # graph
@@ -47,15 +54,18 @@ l_mds <- layout_with_mds(g2)
 # get unique groups
 the_groups <- unique_groups(nodes$group)
 
+nodes$size <- nodes$size * 0.5
+
 # build graph
 visNetwork(nodes, edges, main = "Test") %>%
     visEdges(width = 0.1, arrow = "to", arrowStrikethrough = FALSE) %>%
     visNodes(label = NULL, font = list(size = 0)) %>%
     visOptions(selectedBy = list(variable = "group", multiple = TRUE),
-               highlightNearest = list(enabled = T, degree = 2, hover = T),
-               nodesIdSelection = list(enabled = T, useLabels = F)) %>%
+               highlightNearest = list(enabled = T, degree = 2, hover = F),
+               nodesIdSelection = list(enabled = T, useLabels = F),
+               autoResize = T, collapse = list(enabled = T, fit = T)) %>%
     visIgraphLayout(layout = "layout.norm", randomSeed = 222,
-                    smooth = TRUE, layoutMatrix = l_rt) %>%
+                    smooth = TRUE, layoutMatrix = l_drl) %>%
     visGroups(groupname = the_groups[8], shape = "triangle") %>%
     visGroups(groupname = the_groups[6], shape = "square") %>%
     visGroups(groupname = the_groups[11], shape = "diamond") %>%
