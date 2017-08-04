@@ -46,12 +46,6 @@ basic_graph <- function(edgelist){
         edgelist[,c("parent", "child")]), directed = T)
     colors <- RColorBrewer::brewer.pal(n = 3, name = "Set2")
     roots <- which(igraph::degree(g, v = igraph::V(g), mode = "in")==0)
-    # if("weight" %in% colnames(edgelist)){
-    #     igraph::V(g)$weight <- dplyr::left_join(
-    #         as.data.frame(igraph::V(g)$name, stringsAsFactors = FALSE),
-    #         edgelist[,c("child", "weight")],
-    #         by = c("igraph::V(g)$name"="child"))$weight
-    # }
 
     # set Vertex and Edge color attributes
     igraph::E(g)$color <- colors[1]
