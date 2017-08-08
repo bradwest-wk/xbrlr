@@ -21,6 +21,7 @@ Imports:
     shiny,
     shinyjs,
     stringr,
+    tibble,
     tidyr,
     visNetwork
 Depends: R (>= 3.3.3)
