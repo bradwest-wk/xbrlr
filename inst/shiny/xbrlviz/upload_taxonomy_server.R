@@ -121,17 +121,28 @@ observeEvent(input$reset_input, {
 
 # =============================================================================
 # visNetwork
+# TODO: Rotate node labels and add color to nodes if needed
 
 output$vis_net <- renderVisNetwork({
     req(input$input_file, rv$data)
-    nodes <- get_visNet_nodes(rv$data, physics_on = TRUE)
+    nodes <- get_visNet_nodes(rv$data, physics_on = FALSE)
     edges <- get_visNet_edges(rv$data, nodes)
 
-    visNetwork(nodes, edges, main = input$input_file$name) %>%
-        visEdges(width = 0.2, arrow = 'to', arrowStrikethrough = F) %>%
+    network <- visNetwork(nodes, edges, main = input$input_file$name) %>%
+        visEdges(width = 0.2, arrows = 'to', arrowStrikethrough = F) %>%
         visOptions(highlightNearest = list(enabled = T, degree = 2, hover = F),
-                   nodesIdSelection = list(enabled = T, useLabels = T),
-                   collapse = list(enabled = T, fit = T)) %>%
-        visHierarchicalLayout(levelSeparation = 300, direction = 'UD')
+                   nodesIdSelection = list(enabled = T, useLabels = T)) %>%
+        visIgraphLayout(layout = 'layout_as_tree')
+
+    # modify the matrix (rotate 180 degrees)
+    l <- ncol(nodes)
+    network$x$nodes[, l+1] <-
+        network$x$nodes[, c(l+1)] + network$x$nodes[, c(l+2)]
+    network$x$nodes[, l+2] <-
+        network$x$nodes[, c(l+1)] - network$x$nodes[, c(l+2)]
+    network$x$nodes[, l+1] <-
+        network$x$nodes[, c(l+1)] - network$x$nodes[, c(l+2)]
+    network$x$nodes[, l+1] <- network$x$nodes[, l+1] * -1
+    network
 })
 

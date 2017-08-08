@@ -17,6 +17,8 @@
 # and potentially by group
 
 # =============================================================================
+# TODO: Fix get_visNet_nodes and get_visNet_edges to produce correct tree (
+# Revenues v2 does not have revenues as root node)
 
 #' Get visNet Nodes
 #'
