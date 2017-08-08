@@ -43,7 +43,10 @@ fluidPage(
                                                   resetOnNew = TRUE),
                                 dblclick = "plot_dblclick2"), value = "std"
         ),
-        tabPanel("VisNetwork Plot", value = "visNet"),
+        tabPanel("visNetwork Plot",
+                 visNetworkOutput("vis_net", width='100%', height='900px'),
+                 value = "visNet"
+                 ),
         selected = "visNet"
         )
     )

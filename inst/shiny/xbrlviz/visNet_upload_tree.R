@@ -26,22 +26,22 @@
 #' @param physics_on Should physics be used for nodes
 #' @return a nodes dataframe to be used in the visNet graph
 #' @export
-get_visNet_nodes <- function(input, physics_on = TRUE,
-                             layout_direction = 'UD') {
+get_visNet_nodes <- function(input, physics_on = TRUE) {
     colnames(input) <- tolower(colnames(input))
     node_vec <- unique(c(input$parent, input$child))
     node_vec <- sort(node_vec)
-    nodes <- as_tibble(node_vec) %>% rowid_to_column() %>%
-        rename(id = rowid, label = value) %>%
-        mutate(title = label, physics = physics_on)
+    nodes <- tibble::as_tibble(node_vec) %>% tibble::rowid_to_column() %>%
+        dplyr::rename(id = rowid, label = value) %>%
+        dplyr::mutate(title = label, physics = physics_on)
     if ('group' %in% colnames(input)) {
         nodes <- nodes %>%
-            left_join(input[c('child','group')], by = c('label'='child'))
+            dplyr::left_join(input[c('child','group')], by = c('label'='child'))
     }
     if ('label' %in% colnames(input)) {
-        input %>% rename(title = label)
-        nodes <- nodes %>% select(-title) %>%
-            left_join(input[c('child', 'label')], by = c('label'='child'))
+        input %>% dplyr::rename(title = label)
+        nodes <- nodes %>% dplyr::select(-title) %>%
+            dplyr::left_join(
+                input[c('child', 'label')], by = c('label'='child'))
     }
     return(nodes)
 }

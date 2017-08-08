@@ -119,4 +119,19 @@ observeEvent(input$reset_input, {
 })
 
 
+# =============================================================================
+# visNetwork
+
+output$vis_net <- renderVisNetwork({
+    req(input$input_file, rv$data)
+    nodes <- get_visNet_nodes(rv$data, physics_on = TRUE)
+    edges <- get_visNet_edges(rv$data, nodes)
+
+    visNetwork(nodes, edges, main = input$input_file$name) %>%
+        visEdges(width = 0.2, arrow = 'to', arrowStrikethrough = F) %>%
+        visOptions(highlightNearest = list(enabled = T, degree = 2, hover = F),
+                   nodesIdSelection = list(enabled = T, useLabels = T),
+                   collapse = list(enabled = T, fit = T)) %>%
+        visHierarchicalLayout(levelSeparation = 300, direction = 'UD')
+})
 
