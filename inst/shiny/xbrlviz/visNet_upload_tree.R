@@ -85,7 +85,8 @@ get_raw_input <- function(input) {
     raw <- readxl::read_excel(paste(input$datapath, '.xlsx', sep=""),
                               sheet = 1, col_names = TRUE)
     # fill down missing values
-    filled <- tidyr::fill(data, colnames(raw)[1])
+    colnames(raw)[c(1,2)] <- c('parent', 'child')
+    filled <- tidyr::fill(raw, 'parent')
     if ( sum(duplicated(filled)) > 0 ) {
         warning("Duplicated edges in dataframe--investigate further.")
     }

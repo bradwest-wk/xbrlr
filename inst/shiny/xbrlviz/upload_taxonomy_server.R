@@ -1,4 +1,5 @@
 # creates server side for app tab: upload and visualize custom taxonomy
+source("./visNet_upload_tree.R")
 
 output$instructions2 <-
     renderText("Upload an Excel file in the below format.
@@ -18,20 +19,26 @@ rv <- reactiveValues(data = NULL)
 
 uploadInput <- reactive({
     req(input$input_file, input$link2)
-    inFile <- input$input_file
-    # need to rename the file so that read_excel works
-    file.rename(inFile$datapath,
-                paste(inFile$datapath, ".xlsx", sep=""))
-    raw <- readxl::read_excel(paste(inFile$datapath, ".xlsx", sep=""),
-                              sheet = 1, col_names = TRUE)
-     data <- raw[,c(1,2)]
-     colnames(data) <- c("parent", "child")
-     data <- tidyr::fill(data, parent)
-     if ( sum(duplicated(data)) > 0 ) {
-         warning("Duplicated edges in dataframe--investigate further.")
-     }
-     data
+    data <- get_raw_input(input$input_file)
+    data
 })
+
+# uploadInput <- reactive({
+#     req(input$input_file, input$link2)
+#     inFile <- input$input_file
+#     # need to rename the file so that read_excel works
+#     file.rename(inFile$datapath,
+#                 paste(inFile$datapath, ".xlsx", sep=""))
+#     raw <- readxl::read_excel(paste(inFile$datapath, ".xlsx", sep=""),
+#                               sheet = 1, col_names = TRUE)
+#     data <- raw[,c(1,2)]
+#     colnames(data) <- c("parent", "child")
+#     data <- tidyr::fill(data, parent)
+#     if ( sum(duplicated(data)) > 0 ) {
+#         warning("Duplicated edges in dataframe--investigate further.")
+#     }
+#     data
+# })
 
 observe({
     req(input$input_file)
@@ -59,15 +66,6 @@ basic_graph <- function(edgelist){
     return(g)
 }
 
-# output$fname <-
-#     renderPrint(
-#         print(input$input_file$datapath)
-#     )
-
-# output$df <-
-#     renderPrint(
-#         head(uploadInput)
-#     )
 
 output$uploadTree <- renderPlot({
     req(input$input_file, rv$data)

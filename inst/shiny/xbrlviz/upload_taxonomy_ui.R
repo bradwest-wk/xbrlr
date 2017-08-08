@@ -35,11 +35,16 @@ fluidPage(
         # verbatimTextOutput("fname"),
         #
         # verbatimTextOutput("df"),
-
-        plotOutput("uploadTree", width="100%", height = "900px",
-                   click = "plot_click2",
-                   brush = brushOpts(id = "plot_brush2", resetOnNew = TRUE),
-                   dblclick = "plot_dblclick2"
+        tabsetPanel(
+            tabPanel("Traditional Plot",
+                     plotOutput("uploadTree", width="100%", height = "900px",
+                                click = "plot_click2",
+                                brush = brushOpts(id = "plot_brush2",
+                                                  resetOnNew = TRUE),
+                                dblclick = "plot_dblclick2"), value = "std"
+        ),
+        tabPanel("VisNetwork Plot", value = "visNet"),
+        selected = "visNet"
         )
     )
 )
