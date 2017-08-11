@@ -28,7 +28,7 @@
 #' @param physics_on Should physics be used for nodes
 #' @return a nodes dataframe to be used in the visNet graph
 #' @export
-get_visNet_nodes <- function(input, physics_on = TRUE) {
+get_visNet_nodes <- function(input, physics_on = FALSE) {
     colnames(input) <- tolower(colnames(input))
     node_vec <- unique(c(input$parent, input$child))
     node_vec <- sort(node_vec)

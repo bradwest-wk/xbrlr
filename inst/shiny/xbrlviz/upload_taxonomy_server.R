@@ -15,6 +15,9 @@ Contact brad dot west at workiva dot com with bug reports or questions.
 | ...      | ...     | ...      | ...         |"
                )
 
+output$or <-
+    renderText("OR")
+
 rv <- reactiveValues(data = NULL)
 
 uploadInput <- reactive({

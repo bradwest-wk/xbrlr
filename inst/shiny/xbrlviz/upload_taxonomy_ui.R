@@ -14,9 +14,13 @@ fluidPage(
                                        ),
                                        selected = "Calculation")
                        ),
-                column(3, fileInput('input_file',
+                column(3,
+                       fileInput('input_file',
                                     label = "Taxonomy upload (Excel)",
                                     width = '100%'),
+                       # textOutput("or"),
+                       uiOutput("loginButton"),
+                       br(),
                        actionButton("reset_input", "Reset Input File")
                        ),
                 column(1, radioButtons(
@@ -47,7 +51,9 @@ fluidPage(
                  visNetworkOutput("vis_net", width='100%', height='900px'),
                  value = "visNet"
                  ),
-        selected = "visNet"
+        tabPanel("Test Google Sheets",
+                 source("./import_from_google_ui.R", local = TRUE)),
+        selected = ""
         )
     )
 )
