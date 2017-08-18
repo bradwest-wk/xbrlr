@@ -178,11 +178,12 @@ server <- function(input, output, session) {
         }
     })
 
+    source("./import_from_google_server.R", local = TRUE)
+
     source("./upload_taxonomy_server.R", local = TRUE)
 
     source("./whole_tx_server.R", local = TRUE)
 
-    source("./import_from_google_server.R", local = TRUE)
 
     # output$credit <- renderText("Work in progress.  Contact brad dot west at
     #                             workiva dot com with questions or feature

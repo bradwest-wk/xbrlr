@@ -2,9 +2,18 @@
 source("./visNet_upload_tree.R")
 
 output$instructions2 <-
-    renderText("Upload an Excel file in the below format.
-Contact brad dot west at workiva dot com with bug reports or questions.
- _____________________________________________
+    renderText("The user can upload an excel file or alternatively input the
+Google spreadsheet and tab (sheet) names.  The user will need to grant the app
+permission to access that sheet.  Both an excel file and the google sheets file must be in the below
+format. The tree is rendered in two forms, a more traditional format and a
+more interactive (visNetwork) format that allows for selecting elements by ids and
+highlighting nearest edges.  If coloring and selecting groups of nodes would be valuable,
+we can speak about adding that functionality to the visNetwork graph. Contact
+brad dot west at workiva dot com with bug reports or questions."
+               )
+output$format <-
+    renderText(
+" _____________________________________________
 | PARENT   | CHILD   | COLUMN_3 | ...COLUMN_X |
 | -------- | ------- | -------- | ----------- |
 | parent_1 | child_1 | ...      | ...         |
@@ -13,7 +22,7 @@ Contact brad dot west at workiva dot com with bug reports or questions.
 |          | child_2 | ...      | ...         |
 |          | child_3 | ...      | ...         |
 | ...      | ...     | ...      | ...         |"
-               )
+    )
 
 output$or <-
     renderText("OR")
@@ -48,6 +57,15 @@ observe({
     rv$data <- uploadInput()
 })
 
+observeEvent(input$get_sheet, {
+    req(input$sheet_title, input$tab_title)
+    validate(
+        need(!is.null(access_token()), label = "access token")
+    )
+    rv$data <- get_df_reactive()
+})
+
+
 ranges2 <- reactiveValues(x = c(-1,1), y = c(-1,1))
 
 # Creates a basic graph with correct theme colors
@@ -71,7 +89,7 @@ basic_graph <- function(edgelist){
 
 
 output$uploadTree <- renderPlot({
-    req(input$input_file, rv$data)
+    req(rv$data)
     zoom_level <- 2 / (ranges2$x[2] - ranges2$x[1])
     # need to call reactive uploadInput function below
     g <- basic_graph(rv$data)
@@ -104,13 +122,18 @@ image_content <- function(file) {
 
 output$downloadData <- downloadHandler(
     filename = function() {
-        req(input$input_file)
-        paste0(strsplit(input$input_file$name, "[.]")[[1]][1], "_",
-               format(Sys.time(), "%Y-%m-%d-%H%M%S"), ".png")
+        if (isTruthy(input$input_file)) {
+            paste0(strsplit(input$input_file$name, "[.]")[[1]][1], "_",
+                   format(Sys.time(), "%Y-%m-%d-%H%M%S"), ".png")
+        } else if (isTruthy(input$sheet_title)) {
+            paste0(strsplit(input$sheet_title, "[.]")[[1]][1], "_",
+                   format(Sys.time(), "%Y-%m-%d-%H%M%S"), ".png")
+        }
+
     },
     content = function(file) {
-        req(input$input_file)
-        g <- basic_graph(uploadInput())
+        req(rv$data)
+        g <- basic_graph(rv$data)
         xbrlr::plot_graph(g, file, title = input$input_file$name)
     },
     contentType = "image/png"
@@ -127,7 +150,7 @@ observeEvent(input$reset_input, {
 # TODO: Rotate node labels and add color to nodes if needed
 
 output$vis_net <- renderVisNetwork({
-    req(input$input_file, rv$data)
+    req(rv$data)
     nodes <- get_visNet_nodes(rv$data, physics_on = FALSE)
     edges <- get_visNet_edges(rv$data, nodes)
 
