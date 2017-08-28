@@ -44,45 +44,15 @@ ui <- fluidPage(
 
     titlePanel("Taxonomy Visualization"),
 
-    tags$head(tags$style(
-        HTML("
-            @import url('https://fonts.googleapis.com/css?family=Lato');
-
-            body, label, input, button, select {
-             font-family: 'Lato', sans-serif;
-             font-weight: 200;
-             }
-
-             #controls {
-                 /* Appearance */
-                 background-color: white;
-                 padding: 0 20px 20px 20px;
-                 cursor: move;
-                 /* Fade out while not hovering */
-                 opacity: 0.65;
-                 zoom: 0.9;
-                 transition: opacity 500ms 1s;
-                 border-width: 15px;
-                 border-color: rgba(10,10,10,1);
-             }
-             #controls:hover {
-                /* Fade in while hovering */
-                opacity: 0.95;
-                transition-delay: 0;
-             }
-             #upload_type {background-color: rgba(255,255,255,0.5);}
-             #loginButton {background-color: rgba(255,255,255,0.5);}
-             #sheet_title {background-color: rgba(255,255,255,0.5);}
-             #tab_title {background-color: rgba(255,255,255,0.5);}
-             #excel_file {background-color: rgba(255,255,255,0.5);}
-             #reset_inputfile {background-color: rgba(255,255,255,0.5);}")
-        )),
+    tags$head(
+        includeCSS('./styles.css')
+        ),
 
     # the plot
     visNetworkOutput("vis_net", width='100%', height='2400px'),
 
     absolutePanel(id = 'controls', class = 'panel panel-default', fixed = TRUE,
-                  draggable = TRUE, top = 60, left = 'auto', right = 20,
+                  draggable = TRUE, top = 115, left = 15, right = 'auto',
                   bottom = 'auto', width = 340, height = 'auto',
 
                   h4('Upload Controls - Drag to Move'),

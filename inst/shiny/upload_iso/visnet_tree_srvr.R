@@ -101,3 +101,6 @@ output$vis_net <- renderVisNetwork({
     network$x$nodes[, l+1] <- network$x$nodes[, l+1] * -1
     network
 })
+
+# output for generating png of the image
+# see: https://github.com/datastorm-open/visNetwork/issues/138
