@@ -54,8 +54,9 @@ ui <- fluidPage(
     htmlOutput("instructions",
                style =
                   'position: absolute;
-                   top: 50%;
+                   top: 40%;
                    left: 50%;
+                   right: 25%;
                    font-size: 130%;
                    transform: translate(-50%, -50%);'),
 
@@ -109,19 +110,30 @@ server <- function(input, output, session) {
 
     source('./visnet_tree_srvr.R', local = TRUE)
 
-    output$instructions <- renderText({
-        req(is.null(rv$data))
-        message <-
-            paste("To import an edgelist from Google Sheets, first authorize
-                  Google Sheets, then enter the Sheet and Worksheet names, and
-                  finally click 'Import'.  Alternatively, you may upload a .xlsx
-                  file from your local machine. Use scroll to zoom, click and
-                  drag to pan, and either 'Select by ID' or clicking on nodes
-                  to select individual nodes.  If you wish to export the network,
-                  click Export Network and a browser download will commence. To
-                  view these instructions again, click 'Reset Input'.  Contact
-                  brad dot g dot west at workiva dot com with bug reports or
-                  questions.")
+    # output$instructions <- renderText({
+    #     req(is.null(rv$data))
+    #     message <-
+    #         paste("To import an edgelist from Google Sheets, first authorize
+    #               Google Sheets, then enter the Sheet and Worksheet names, and
+    #               finally click 'Import'.  Alternatively, you may upload a .xlsx
+    #               file from your local machine. Use scroll to zoom, click and
+    #               drag to pan, and either 'Select by ID' or clicking on nodes
+    #               to select individual nodes.  If you wish to export the network,
+    #               click Export Network and a browser download will commence. To
+    #               view these instructions again, click 'Reset Input'.  Contact
+    #               brad dot g dot west at workiva dot com with bug reports or
+    #               questions.")
+    # })
+
+    output$instructions <- renderUI({
+        str <- paste("The user may choose to import an edgelist from Google Drive or from a local Excel file.",
+                     "To import from Sheets: 1. Authorize, 2. Enter spreadsheet and worksheet titles, 3. Import.",
+                     "The first two columns of the sheet must define parent-child relationships and contain a header
+                     in the first row. Use scroll to zoom, click-drag to pan, and mouse clicks or the dropdown list to select nodes.",
+                     "If you wish to export the network, use the button in the upper right and a browser download will commence",
+                     "To view these instructions again, click 'Reset Input'. Contact Brad West via Hipchat or brad dot west at workiva
+                     dot com with bug reports or questions.", sep ='<br/><br/>')
+        HTML(str)
     })
 
     observeEvent(input$get_edges, {

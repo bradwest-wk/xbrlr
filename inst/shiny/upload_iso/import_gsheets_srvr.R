@@ -2,12 +2,17 @@
 # Server code for importing user developed taxonomy from gsheets
 # =============================================================================
 
-# need to specify these options when deploying to the server
-# options("googlesheets.webapp.client_id" = MY_CLIENT_ID)
-# options("googlesheets.webapp.client_secret" = MY_CLIENT_SECRET)
-# options("googlesheets.webapp.redirect_uri" = MY_REDIRECT_URI)
+# Specifying webapp information for deployment to shiny server
+CLIENT_ID <-
+    "808310163336-oeqp8ud6rf93fk6modohb55jebnf7fja.apps.googleusercontent.com"
+CLIENT_SECRET <- "qrVg8_JRFuSTnAHKdMnnEjvd"
+REDIRECT_URI <- "https://bradwest-wk.shinyapps.io/upload_iso/"
 
-options("googlesheets.webapp.redirect_uri" = 'http://127.0.0.1:4642')
+options("googlesheets.webapp.client_id" = CLIENT_ID)
+options("googlesheets.webapp.client_secret" = CLIENT_SECRET)
+options("googlesheets.webapp.redirect_uri" = REDIRECT_URI)
+
+# options("googlesheets.webapp.redirect_uri" = 'http://127.0.0.1:4642')
 
 output$loginButton <- renderUI({
     if (is.null(isolate(access_token()))) {
@@ -37,6 +42,7 @@ get_df_tx <- function(sheet_title, tab_title = 1) {
     df <- googlesheets::gs_read(sht, ws = tab_title)
     return(df)
 }
+
 
 # test get specific sheet
 get_df_reactive <- reactive({
