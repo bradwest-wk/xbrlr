@@ -180,5 +180,36 @@ edges <- as_tibble(edges) %>%
 
 visNetwork(nodes, edges)
 # =============================================================================
+# Play around with underlying matrix and label manipulation for visNetwork
+# =============================================================================
 
+edges <-
+    readxl::read_excel(
+        "~/drive/Projects/taxonomy_rebuild/revenue_calc_vis/Revenue_tree_170411_v2.xlsx") %>%
+    tidyr::fill(Parent) %>%
+    dplyr::select(Parent, Child)
 
+source("./inst/shiny/upload_iso/visnet_tree_srvr.R")
+
+nodes <- get_visNet_nodes(edges)
+the_edges <- get_visNet_edges(edges, nodes)
+
+# make the network
+network <- visNetwork(nodes, the_edges) %>%
+    visEdges(width = 0.2, arrows = 'to', arrowStrikethrough = F) %>%
+    visNodes(shape = 'dot',
+        color = list(background = 'rgba(151, 194, 252, 0.7)'),
+             font = list(align = 'center')) %>%
+    visOptions(highlightNearest = list(enabled = T, degree = 2, hover = F),
+               nodesIdSelection = list(enabled = T, useLabels = T)) %>%
+    visIgraphLayout(layout = 'layout_as_tree')
+# modify the matrix (rotate 180 degrees)
+l <- ncol(nodes)
+network$x$nodes[, l+1] <-
+    network$x$nodes[, c(l+1)] + network$x$nodes[, c(l+2)]
+network$x$nodes[, l+2] <-
+    network$x$nodes[, c(l+1)] - network$x$nodes[, c(l+2)]
+network$x$nodes[, l+1] <-
+    network$x$nodes[, c(l+1)] - network$x$nodes[, c(l+2)]
+network$x$nodes[, l+1] <- network$x$nodes[, l+1] * -1
+network
