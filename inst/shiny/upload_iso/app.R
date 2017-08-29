@@ -48,8 +48,16 @@ ui <- fluidPage(
         includeCSS('./styles.css')
         ),
 
-    # the plot
-    visNetworkOutput("vis_net", width='100%', height='2400px'),
+    # the plots
+    visNetworkOutput("vis_net", width='100%', height='2000px'),
+
+    htmlOutput("instructions",
+               style =
+                  'position: absolute;
+                   top: 50%;
+                   left: 50%;
+                   font-size: 130%;
+                   transform: translate(-50%, -50%);'),
 
     absolutePanel(id = 'controls', class = 'panel panel-default', fixed = TRUE,
                   draggable = TRUE, top = 115, left = 15, right = 'auto',
@@ -74,29 +82,55 @@ ui <- fluidPage(
 
                   conditionalPanel("input.upload_type == 'excel'",
                                    fileInput('excel_file',
-                                             label = "Upload Excel"),
-                                   actionButton('reset_inputfile',
-                                                label = 'Reset Input')),
+                                             label = "Upload Excel",
+                                             placeholder = 'network.xlsx')),
 
                   br(),
 
-                  actionButton('get_edges', 'Import')
-                  )
+
+                  actionButton('get_edges', 'Import'),
+                  actionButton('reset_inputfile',
+                               label = 'Reset Input')
+                  ),
+
+    div(style =
+            'position: fixed;
+            right: 10px;
+            top: 10px;',
+        downloadButton("download_net", 'Export Network'))
 )
 
 
 server <- function(input, output, session) {
 
-    rv <- reactiveValues(data = NULL)
+    rv <- reactiveValues(data = NULL, name = NULL)
 
     source('./import_gsheets_srvr.R', local = TRUE)
+
+    source('./visnet_tree_srvr.R', local = TRUE)
+
+    output$instructions <- renderText({
+        req(is.null(rv$data))
+        message <-
+            paste("To import an edgelist from Google Sheets, first authorize
+                  Google Sheets, then enter the Sheet and Worksheet names, and
+                  finally click 'Import'.  Alternatively, you may upload a .xlsx
+                  file from your local machine. Use scroll to zoom, click and
+                  drag to pan, and either 'Select by ID' or clicking on nodes
+                  to select individual nodes.  If you wish to export the network,
+                  click Export Network and a browser download will commence. To
+                  view these instructions again, click 'Reset Input'.  Contact
+                  brad dot g dot west at workiva dot com with bug reports or
+                  questions.")
+    })
 
     observeEvent(input$get_edges, {
         if (input$upload_type == 'excel') {
             validate(
                 need(input$excel_file, message = 'Please choose an excel file')
             )
-            # function to assign data from text_input to rv$data
+            rv$name <- strsplit(input$excel_file$name, '.xls')[[1]]
+            rv$data <- get_raw_input(input$excel_file)
         } else if (input$upload_type == 'gsheets') {
             req(input$sheet_title, input$tab_title)
             validate(
@@ -111,16 +145,16 @@ server <- function(input, output, session) {
                                "a Google page where you will authenticate",
                                "yourself and authorize this app to access",
                                "your Google Sheets and Google Drive.")))
+            rv$name <- input$sheet_title
             rv$data <- get_df_reactive()
         }
     })
 
     observeEvent(input$reset_inputfile, {
-        reset('excel_file')
+        shinyjs::reset('excel_file')
+        shinyjs::reset('sheet_title')
         rv$data <- NULL
     })
-
-    source('./visnet_tree_srvr.R', local = TRUE)
 
 }
 

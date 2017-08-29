@@ -77,19 +77,23 @@ get_raw_input <- function(input) {
     return(filled)
 }
 
-
-# output for generating visNetwork Tree, in rotated form with selection of nodes
-output$vis_net <- renderVisNetwork({
+# =============================================================================
+# Server Components
+# =============================================================================
+# Reactive function to get the network. Instead of fitting inside of
+# renderVisNetwork(), which would only render the network useful to the
+# ui, and not other server functions
+network <- reactive({
     req(rv$data)
     nodes <- get_visNet_nodes(rv$data, physics_on = FALSE)
     edges <- get_visNet_edges(rv$data, nodes)
 
     network <- visNetwork(nodes, edges, main = input$input_file$name) %>%
         visEdges(width = 0.2, arrows = 'to', arrowStrikethrough = F) %>%
+        visNodes(color = list(background = 'rgba(151, 194, 252, 0.65)')) %>%
         visOptions(highlightNearest = list(enabled = T, degree = 2, hover = F),
                    nodesIdSelection = list(enabled = T, useLabels = T)) %>%
         visIgraphLayout(layout = 'layout_as_tree')
-
     # modify the matrix (rotate 180 degrees)
     l <- ncol(nodes)
     network$x$nodes[, l+1] <-
@@ -102,5 +106,22 @@ output$vis_net <- renderVisNetwork({
     network
 })
 
-# output for generating png of the image
+# output for generating visNetwork Tree, in rotated form with selection of nodes
+output$vis_net <- renderVisNetwork({
+    network <- network()
+    network
+})
+
+# Save Button
 # see: https://github.com/datastorm-open/visNetwork/issues/138
+output$download_net <- downloadHandler(
+    filename = function() {
+        paste0(rv$name, '_', Sys.Date(), '.html')
+    },
+    content = function(file) {
+        network <- network()
+        network %>% visSave(file)
+    }
+)
+
+
