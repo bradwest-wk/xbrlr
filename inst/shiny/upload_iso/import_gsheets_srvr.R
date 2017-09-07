@@ -3,22 +3,23 @@
 # =============================================================================
 
 # Specifying webapp information for deployment to shiny server
-CLIENT_ID <-
-    "808310163336-oeqp8ud6rf93fk6modohb55jebnf7fja.apps.googleusercontent.com"
-CLIENT_SECRET <- "qrVg8_JRFuSTnAHKdMnnEjvd"
-REDIRECT_URI <- "https://bradwest-wk.shinyapps.io/upload_iso/"
+# CLIENT_ID <-
+#     "808310163336-oeqp8ud6rf93fk6modohb55jebnf7fja.apps.googleusercontent.com"
+# CLIENT_SECRET <- "qrVg8_JRFuSTnAHKdMnnEjvd"
+# REDIRECT_URI <- "https://bradwest-wk.shinyapps.io/upload_iso/"
+#
+# options("googlesheets.webapp.client_id" = "178989665258-mbn7q84ai89if6ja59jmh8tqn5aqoe3n.apps.googleusercontent.com")
+# options("googlesheets.webapp.client_secret" = "UiF2uCHeMiUH0BeNbSAzzBxL")
+# options("googlesheets.webapp.redirect_uri" = REDIRECT_URI)
 
-options("googlesheets.webapp.client_id" = CLIENT_ID)
-options("googlesheets.webapp.client_secret" = CLIENT_SECRET)
-options("googlesheets.webapp.redirect_uri" = REDIRECT_URI)
-
-# options("googlesheets.webapp.redirect_uri" = 'http://127.0.0.1:4642')
+options("googlesheets.webapp.redirect_uri" = 'http://127.0.0.1:4642')
 
 output$loginButton <- renderUI({
     if (is.null(isolate(access_token()))) {
         tags$a("Authorize Google Sheets",
                href = googlesheets::gs_webapp_auth_url(),
-               class = "btn btn-default")
+               class = "btn btn-default",
+               style = 'padding:6px; font-size:120%')
     } else {
         return()
     }

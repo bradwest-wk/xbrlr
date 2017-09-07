@@ -125,3 +125,12 @@ output$download_net <- downloadHandler(
 )
 
 
+# Redraw network. Requires passing visNetworkProxy
+observeEvent(input$redraw_net, {
+    output$vis_net <- renderVisNetwork({
+        network <- network()
+        network
+    })
+})
+
+
