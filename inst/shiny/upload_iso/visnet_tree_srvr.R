@@ -90,7 +90,8 @@ network <- reactive({
 
     network <- visNetwork(nodes, edges, main = input$input_file$name) %>%
         visEdges(width = 0.2, arrows = 'to', arrowStrikethrough = F) %>%
-        visNodes(color = list(background = 'rgba(151, 194, 252, 0.65)')) %>%
+        visNodes(color = list(background = 'rgba(151, 194, 252, 0.65)'),
+                 size = 13, font = list(size =13, align = 'left')) %>%
         visOptions(highlightNearest = list(enabled = T, degree = 2, hover = F),
                    nodesIdSelection = list(enabled = T, useLabels = T)) %>%
         visIgraphLayout(layout = 'layout_as_tree')
@@ -103,6 +104,7 @@ network <- reactive({
     network$x$nodes[, l+1] <-
         network$x$nodes[, c(l+1)] - network$x$nodes[, c(l+2)]
     network$x$nodes[, l+1] <- network$x$nodes[, l+1] * -1
+    network$x$nodes$y <- network$x$nodes$y*1.75
     network
 })
 
