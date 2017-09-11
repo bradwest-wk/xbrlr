@@ -122,7 +122,13 @@ output$download_net <- downloadHandler(
     },
     content = function(file) {
         network <- network()
-        network %>% visSave(file)
+        # attempt to resize the output network
+        network %>%
+            visOptions(width='1800px', height='1125px',
+                       highlightNearest =
+                           list(enabled = T, degree = 2, hover = F),
+                       nodesIdSelection = list(enabled = T, useLabels = T)) %>%
+            visSave(file)
     }
 )
 
