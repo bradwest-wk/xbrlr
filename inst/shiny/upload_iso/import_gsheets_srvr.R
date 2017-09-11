@@ -48,11 +48,14 @@ get_df_tx <- function(sheet_title, tab_title = 1) {
 # test get specific sheet
 get_df_reactive <- reactive({
     req(input$sheet_title, input$tab_title)
-    data <- get_df_tx(input$sheet_title, input$tab_title)
-    colnames(data)[c(1,2)] <- c('parent', 'child')
-    filled <- tidyr::fill(data, 'parent')
-    if ( sum(duplicated(filled)) > 0 ) {
-        warning("Duplicated edges in dataframe--investigate further.")
-    }
+    withProgress(message="Importing data from Google Drive", value = 0.3, {
+        data <- get_df_tx(input$sheet_title, input$tab_title)
+        colnames(data)[c(1,2)] <- c('parent', 'child')
+        filled <- tidyr::fill(data, 'parent')
+        if ( sum(duplicated(filled)) > 0 ) {
+            warning("Duplicated edges in dataframe--investigate further.")
+        }
+        incProgress(0.7, message = "Plotting data")
+    })
     filled
 })
