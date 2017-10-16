@@ -1,0 +1,32 @@
+@import url('https://fonts.googleapis.com/css?family=Lato');
+
+body, label, input, button, select, title {
+ font-family: 'Lato', sans-serif;
+ font-weight: 200;
+ font-size: 90%;
+}
+
+
+
+body {
+ background-color: rgb(189,239,209) /*rgba(159, 204, 179, 0.6)rgb(189,239,209)*/
+}
+
+ #controls {
+     /* Appearance */
+     background-color: white;
+     padding: 0 20px 20px 20px;
+     cursor: move;
+     /* Fade out while not hovering */
+     opacity: 0.8;
+     zoom: 0.9;
+     transition: opacity 500ms 1s;
+     border-width: 15px;
+     border-color: rgb(10,10,10);
+     font-size: 120%;
+ }
+ #controls:hover {
+    /* Fade in while hovering */
+    opacity: 0.95;
+    transition-delay: 0;
+ }
