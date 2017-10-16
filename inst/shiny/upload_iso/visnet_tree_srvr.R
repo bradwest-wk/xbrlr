@@ -77,6 +77,27 @@ get_raw_input <- function(input) {
     return(filled)
 }
 
+#' Dataframe from CSV Input
+#'
+#' Gets DF from uploaded input in shiny
+#'
+#' @param input The input file to process.  In shiny this will usually be
+#' something like input$in_file. See return values for fileInput for more
+#' information
+#' @return a raw dataframe, uncleaned except for filling
+get_raw_input_csv <- function(input) {
+    # need to rename the temp file so that readxl knows how to handle
+    # file.rename(input$datapath, paste0(input$datapath, '.csv', sep=''))
+    raw <- readr::read_csv(input$datapath, col_names = TRUE)
+    # fill down missing values
+    colnames(raw)[c(1,2)] <- c('parent', 'child')
+    filled <- tidyr::fill(raw, 'parent')
+    if ( sum(duplicated(filled)) > 0 ) {
+        warning("Duplicated edges in dataframe--investigate further.")
+    }
+    return(filled)
+}
+
 # =============================================================================
 # Server Components
 # =============================================================================

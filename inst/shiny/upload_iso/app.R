@@ -69,7 +69,8 @@ ui <- fluidPage(
 
                   radioButtons(inputId = 'upload_type', label = 'Upload Type',
                                choices = c('Google Sheets' = 'gsheets',
-                                           'Excel File' = 'excel'),
+                                           'Excel File' = 'excel',
+                                           'CSV' = 'csv'),
                                inline = TRUE,
                                selected = 'gsheets'),
 
@@ -86,8 +87,13 @@ ui <- fluidPage(
 
                   conditionalPanel("input.upload_type == 'excel'",
                                    fileInput('excel_file',
-                                             label = "Upload Excel",
-                                             placeholder = 'network.xlsx')),
+                                             label = "Upload Excel or CSV",
+                                             placeholder = 'network')),
+
+                  conditionalPanel("input.upload_type == 'csv'",
+                                   fileInput('csv_file',
+                                             label = "Upload CSV",
+                                             placeholder = 'network.csv')),
 
                   br(),
 
@@ -126,7 +132,10 @@ server <- function(input, output, session) {
                      Use scroll to zoom, click/drag to pan, and mouse clicks or the dropdown list to select nodes.",
                      "If you wish to export the network, use the button in the upper right and a browser download will commence.",
                      "To view these instructions again, click 'Reset Input'. Contact Brad West via Hipchat or brad dot west at workiva
-                     dot com with bug reports or questions.", sep ='<br/><br/>')
+                     dot com with bug reports or questions.",
+                     "Note: The app can only accept one connection to Google at a time. If you're being disconnected from the server while
+                     trying to import from Google, it's likely because a teammember is also authenticated with Google. The current work-around
+                     is to upload a .xlsx or .csv file. Thanks.", sep ='<br/><br/>')
         HTML(str)
     })
 
@@ -137,6 +146,12 @@ server <- function(input, output, session) {
             )
             rv$name <- strsplit(input$excel_file$name, '.xls')[[1]]
             rv$data <- get_raw_input(input$excel_file)
+        } else if (input$upload_type == 'csv') {
+            validate(
+                need(input$csv_file, message = 'Please choose a csv file')
+            )
+            rv$name <- strsplit(input$csv_file$name, '.csv')[[1]]
+            rv$data <- get_raw_input_csv(input$csv_file)
         } else if (input$upload_type == 'gsheets') {
             req(input$sheet_title, input$tab_title)
             validate(
