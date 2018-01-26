@@ -23,6 +23,13 @@ server <- function(input, output, session) {
         data <- as.data.frame(x$values, stringsAsFactors=FALSE)
         names(data) <- c('parent', 'child')
         filled <- tidyr::fill(data, 'parent')
+
+        # calculate roots
+        g <- graph_from_edgelist(as.matrix(filled))
+        roots <- V(g)[which(igraph::degree(g, v = igraph::V(g), mode = "in")==0)]
+        l <- layout_as_tree(g, root = roots, rootlevel = rep(1, length(roots)))
+        # print(names(roots))
+
         nodes <- get_visNet_nodes(filled, physics_on = FALSE)
         edges <- get_visNet_edges(filled, nodes)
 
@@ -31,18 +38,24 @@ server <- function(input, output, session) {
             visNodes(color = list(background = 'rgba(151, 194, 252, 0.65)'),
                      size = 13, font = list(size =13, align = 'left')) %>%
             visOptions(highlightNearest = list(enabled = T, degree = 2, hover = F),
-                       nodesIdSelection = list(enabled = T, useLabels = T)) %>%
-            visIgraphLayout(layout = 'layout_as_tree')
+                       nodesIdSelection = list(enabled = T, useLabels = T))
+            # visIgraphLayout(layout = "layout_as_tree")
+            # visIgraphLayout(layout = 'layout_as_tree',
+            #                 root = names(roots),
+            #                 rootlevel = rep(1, length(roots)))
         # modify the matrix (rotate 180 degrees)
-        l <- ncol(nodes)
-        network$x$nodes[, l+1] <-
-            network$x$nodes[, c(l+1)] + network$x$nodes[, c(l+2)]
-        network$x$nodes[, l+2] <-
-            network$x$nodes[, c(l+1)] - network$x$nodes[, c(l+2)]
-        network$x$nodes[, l+1] <-
-            network$x$nodes[, c(l+1)] - network$x$nodes[, c(l+2)]
-        network$x$nodes[, l+1] <- network$x$nodes[, l+1] * -1
-        network$x$nodes$y <- network$x$nodes$y*1.75
+        network$x$nodes$x <- l[,1]
+        network$x$nodes$y <- l[,2]
+
+        # l <- ncol(nodes)
+        # network$x$nodes[, l+1] <-
+        #     network$x$nodes[, c(l+1)] + network$x$nodes[, c(l+2)]
+        # network$x$nodes[, l+2] <-
+        #     network$x$nodes[, c(l+1)] - network$x$nodes[, c(l+2)]
+        # network$x$nodes[, l+1] <-
+        #     network$x$nodes[, c(l+1)] - network$x$nodes[, c(l+2)]
+        # network$x$nodes[, l+1] <- network$x$nodes[, l+1] * -1
+        # network$x$nodes$y <- network$x$nodes$y*1.75
 
         network
     }
@@ -52,8 +65,9 @@ server <- function(input, output, session) {
         l <- googleAuthR::gar_api_generator(
             baseURI = "https://sheets.googleapis.com/v4/",
             http_header = 'GET',
+            # URLencode() range to deal with spaces in tab names
             path_args = list(spreadsheets = spreadsheetId,
-                             values = range),
+                             values = URLencode(range)),
             pars_args = list(majorDimension = 'ROWS',
                              valueRenderOption = 'UNFORMATTED_VALUE'),
             data_parse_function = parse_data)
