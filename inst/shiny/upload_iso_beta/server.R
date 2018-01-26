@@ -23,15 +23,34 @@ server <- function(input, output, session) {
         data <- as.data.frame(x$values, stringsAsFactors=FALSE)
         names(data) <- c('parent', 'child')
         filled <- tidyr::fill(data, 'parent')
+        message("got filled")
+
+        filled <- filled[!duplicated(filled), ]
+        message("deduped")
 
         # calculate roots
-        g <- graph_from_edgelist(as.matrix(filled))
-        roots <- V(g)[which(igraph::degree(g, v = igraph::V(g), mode = "in")==0)]
-        l <- layout_as_tree(g, root = roots, rootlevel = rep(1, length(roots)))
-        # print(names(roots))
+        g <- igraph::graph_from_edgelist(as.matrix(filled), directed = TRUE)
+        roots <- igraph::V(g)[which(igraph::degree(g, v = igraph::V(g), mode = "in")==0)]
+        coord <- igraph::layout_as_tree(g, root = roots,
+                                rootlevel = rep(1, length(roots)))
+        message("created coords")
+        # from igraph to network. Could work as temporary fix
+        # data <- toVisNetworkData(g)
+        # network <- visNetwork(nodes = data$nodes, edges = data$edges) %>%
+        #     visOptions(highlightNearest = list(enabled = T, degree = 2, hover = F),
+        #                nodesIdSelection = list(enabled = T, useLabels = T))
+        nodes <- data.frame(id = 1:length(igraph::V(g)),
+                            label = names(igraph::V(g)),
+                            title = names(igraph::V(g)),
+                            physics = FALSE)
+        message("created nodes df")
 
-        nodes <- get_visNet_nodes(filled, physics_on = FALSE)
         edges <- get_visNet_edges(filled, nodes)
+
+        message("created edges")
+
+        # nodes <- get_visNet_nodes(filled, physics_on = FALSE)
+        # edges <- get_visNet_edges(filled, nodes)
 
         network <- visNetwork(nodes, edges) %>%
             visEdges(width = 0.2, arrows = 'to', arrowStrikethrough = F) %>%
@@ -39,25 +58,42 @@ server <- function(input, output, session) {
                      size = 13, font = list(size =13, align = 'left')) %>%
             visOptions(highlightNearest = list(enabled = T, degree = 2, hover = F),
                        nodesIdSelection = list(enabled = T, useLabels = T))
+
+        message("created network")
+            # visHierarchicalLayout(direction = "LR", sortMethod = "directed")
             # visIgraphLayout(layout = "layout_as_tree")
             # visIgraphLayout(layout = 'layout_as_tree',
             #                 root = names(roots),
             #                 rootlevel = rep(1, length(roots)))
+
+        network$x$nodes$x <- coord[,1]
+        network$x$nodes$y <- coord[,2]
+
+        # From source for visIgraphLayout.R
+        to <- c(-1, 1)
+        from <- range(network$x$nodes$x, na.rm = TRUE, finite = TRUE)
+        network$x$nodes$x <-
+            (network$x$nodes$x - from[1])/diff(from) * diff(to) + to[1]
+        from <- range(network$x$nodes$y, na.rm = TRUE, finite = TRUE)
+        network$x$nodes$y <-
+            (network$x$nodes$y - from[1])/diff(from) * diff(to) + to[1]
+
+        network$x$nodes$x <- network$x$nodes$x * 500
+        network$x$nodes$y <- network$x$nodes$y * 500
+
         # modify the matrix (rotate 180 degrees)
-        network$x$nodes$x <- l[,1]
-        network$x$nodes$y <- l[,2]
-
-        # l <- ncol(nodes)
-        # network$x$nodes[, l+1] <-
-        #     network$x$nodes[, c(l+1)] + network$x$nodes[, c(l+2)]
-        # network$x$nodes[, l+2] <-
-        #     network$x$nodes[, c(l+1)] - network$x$nodes[, c(l+2)]
-        # network$x$nodes[, l+1] <-
-        #     network$x$nodes[, c(l+1)] - network$x$nodes[, c(l+2)]
-        # network$x$nodes[, l+1] <- network$x$nodes[, l+1] * -1
-        # network$x$nodes$y <- network$x$nodes$y*1.75
-
-        network
+        l <- ncol(nodes)
+        network$x$nodes[, l+1] <-
+            network$x$nodes[, c(l+1)] + network$x$nodes[, c(l+2)]
+        network$x$nodes[, l+2] <-
+            network$x$nodes[, c(l+1)] - network$x$nodes[, c(l+2)]
+        network$x$nodes[, l+1] <-
+            network$x$nodes[, c(l+1)] - network$x$nodes[, c(l+2)]
+        network$x$nodes[, l+1] <- network$x$nodes[, l+1] * -1
+        network$x$nodes$y <- network$x$nodes$y*1.75
+        message("about to return network")
+        # print(network$x$nodes)
+        return(network)
     }
 
     # api call
@@ -67,7 +103,8 @@ server <- function(input, output, session) {
             http_header = 'GET',
             # URLencode() range to deal with spaces in tab names
             path_args = list(spreadsheets = spreadsheetId,
-                             values = URLencode(range)),
+                             # values = URLencode(range)),
+                             values = range),
             pars_args = list(majorDimension = 'ROWS',
                              valueRenderOption = 'UNFORMATTED_VALUE'),
             data_parse_function = parse_data)
