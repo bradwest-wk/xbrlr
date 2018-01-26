@@ -2,6 +2,7 @@
 # Specific Files #
 ##################
 rsconnect/
+test_multiple_g_users/
 
 #####################
 # Environment Files #
@@ -28,6 +29,7 @@ rsconnect/
 *.wgraph
 data/
 extdata/
+logs/
 
 ##############
 # Compressed #
