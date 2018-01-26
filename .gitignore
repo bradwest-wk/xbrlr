@@ -1,12 +1,77 @@
-.Rproj.user
+##################
+# Specific Files #
+##################
+rsconnect/
+
+#####################
+# Environment Files #
+#####################
+.Renviron
+.Rprofile
+*.Rproj
 .Rhistory
-.RData
+.Rproj.user
+.Rbuildignore
 .Ruserdata
+
+########
+# Data #
+########
+*.Rdata
+*.xlsx
+*.csv
+*.json
+*.mov
+*.xls
+*.ods
+*.xml
+*.wgraph
+data/
+extdata/
+
+##############
+# Compressed #
+##############
+*.zip
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+################
+# OS Generated #
+################
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
 src/*.o
 src/*.so
 src/*.dll
-.csv
-.xls
-.xlsx
-.png
-.mp4
+
+##########
+# Images #
+##########
+*.png
+*.jpeg
+*.pdf
+
+#########
+# Other #
+#########
+*.dcf
+.httr-oauth
+*.toc
+\#*\#
+buried_treasure/model/examples/
+
+##############
+# Exceptions #
+##############

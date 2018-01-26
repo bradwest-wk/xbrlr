@@ -61,6 +61,7 @@ server <- function(input, output, session) {
             #                 root = names(roots),
             #                 rootlevel = rep(1, length(roots)))
 
+        # Rotate layout 90 degrees counter clockwise
         network$x$nodes$x <- -1*coord[,2]
         network$x$nodes$y <- coord[,1]
 

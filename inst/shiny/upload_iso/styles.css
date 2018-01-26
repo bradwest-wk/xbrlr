@@ -6,8 +6,6 @@ body, label, input, button, select, title {
  font-size: 90%;
 }
 
-
-
 body {
  background-color: rgb(189,239,209) /*rgba(159, 204, 179, 0.6)rgb(189,239,209)*/
 }
@@ -25,6 +23,7 @@ body {
      border-color: rgb(10,10,10);
      font-size: 120%;
  }
+
  #controls:hover {
     /* Fade in while hovering */
     opacity: 0.95;

@@ -11,7 +11,7 @@
 # options("googlesheets.webapp.client_id" = "178989665258-mbn7q84ai89if6ja59jmh8tqn5aqoe3n.apps.googleusercontent.com")
 # options("googlesheets.webapp.client_secret" = "UiF2uCHeMiUH0BeNbSAzzBxL")
 # options("googlesheets.webapp.redirect_uri" = REDIRECT_URI)
-options("googlesheets.webapp.redirect_uri" = 'http://127.0.0.1:4642')
+# options("googlesheets.webapp.redirect_uri" = 'http://127.0.0.1:4642')
 
 output$loginButton <- renderUI({
     if (is.null(isolate(access_token()))) {
